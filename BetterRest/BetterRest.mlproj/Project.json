@@ -1,0 +1,29 @@
+{
+  "activityEntities" : [
+    "projectCreated",
+    [
+      {
+        "createdDate" : "2026-01-16T18:55:32Z",
+        "event" : "projectCreated",
+        "id" : "CA641439-327E-4655-9B53-46949E563F88",
+        "subtitle" : "BetterRest",
+        "title" : "Project Created"
+      }
+    ]
+  ],
+  "authorName" : "Michael Gillbanks",
+  "createdDate" : "2026-01-16T18:55:32Z",
+  "description" : "",
+  "id" : "09B94AB5-BCBC-4983-8A01-04F08F7D6035",
+  "license" : "",
+  "location" : "",
+  "modifiedDate" : "2026-01-16T18:55:32Z",
+  "projectName" : "BetterRest",
+  "settingsEntity" : {
+    "snapshotOnExtendTraining" : true,
+    "snapshotOnResumeTraining" : false
+  },
+  "taskType" : "generalRegresor",
+  "title" : "Tabular Regression",
+  "version" : "1.1"
+}
