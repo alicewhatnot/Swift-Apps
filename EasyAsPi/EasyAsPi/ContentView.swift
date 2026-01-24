@@ -11,9 +11,9 @@ struct DigitButton: ViewModifier {
     func body(content: Content) -> some View {
         content
             .font(.system(size: 40, weight: .bold))
-            .foregroundStyle(.black.opacity(0.6))
+            .foregroundStyle(Color.primary.opacity(0.6))
             .frame(width: 110, height: 92)
-            .background(Color.secondary.opacity(0.2))
+            .background(Color.primary.opacity(0.2))
             .cornerRadius(10)
             .contentShape(Rectangle())
     }
