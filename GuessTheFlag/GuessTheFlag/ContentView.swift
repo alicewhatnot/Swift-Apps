@@ -27,6 +27,10 @@ struct ContentView: View {
     
     @State private var questionsAsked: Int = 0
     @State private var round: Int = 1
+    
+    @State private var animationAmount: Double = 0
+    @State private var selectedFlag: Int? = nil
+    
     let maxQuestions: Int = 8
     
     var body: some View {
@@ -49,15 +53,31 @@ struct ContentView: View {
                         Text("Tap the flag of")
                             .foregroundStyle(.secondary)
                             .font(.subheadline.weight(.heavy))
+                        
                         Text(countries[correctAnswer])
                             .font(.largeTitle.weight(.semibold))
                     }
                     
                     ForEach(0..<3) { number in
                         Button {
+                            selectedFlag = number
+                            withAnimation(.easeInOut(duration: 0.6)) {
+                                animationAmount += 360
+                            }
                             flagTapped(number)
                         } label: {
                             FlagImage(country: countries[number])
+                                .rotation3DEffect(
+                                    Angle(degrees: selectedFlag == number ? animationAmount : 0),
+                                    axis: (x: 0, y: 1, z: 0)
+                                )
+                                .opacity(
+                                    selectedFlag == nil || selectedFlag == number ? 1 : 0.25
+                                )
+                                .rotation3DEffect(
+                                    Angle(degrees: selectedFlag != number || selectedFlag == nil ? -1 * animationAmount : 0),
+                                    axis: (x: 1, y: 0, z: 0)
+                                )
                         }
                     }
                 }
@@ -120,6 +140,7 @@ struct ContentView: View {
     func askQuestion() {
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        selectedFlag = nil
     }
     
     func restart() {
