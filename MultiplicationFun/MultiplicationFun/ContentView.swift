@@ -1,4 +1,4 @@
-//
+	//
 //  ContentView.swift
 //  MultiplicationFun
 //
@@ -16,18 +16,22 @@ struct ContentView: View {
     @State private var questionsAmount: Int = 5
     @State private var difficulty: Difficulty = .medium
     
-    @State private var multiplicands: [String] = []
     @State private var multipliers: [String] = []
+    @State private var multiplicands: [String] = []
     @State private var questionNumber: Int = 1
     
-    @State private var showingSettings: Bool = false
+    @State private var correctAnswers: Int = 0
+    @State private var userAnswer: String = ""
+    
+    @State private var showingSettings: Bool = true
     
     var body: some View {
-        ZStack {
+        VStack {
             if showingSettings {
                 VStack {
                     HStack {
-                        Text("Number Of Questions")
+                        Text("Questions:")
+                            .font(.system(size: 24))
                         
                         Spacer()
                         
@@ -38,10 +42,15 @@ struct ContentView: View {
                         }
                     }
                     
-                    Stepper("Up to the \(multiplicationTable) times tables", value: $multiplicationTable, in: 2...20)
-                    
                     HStack {
-                        Text("Difficulty")
+                        Text ("Up to the \(multiplicationTable) times tables")
+                            .font(.system(size: 24))
+                        Stepper("", value: $multiplicationTable, in: 2...20)
+                    }
+
+                    HStack {
+                        Text("Difficulty:")
+                            .font(.system(size: 24))
                         
                         Spacer()
                         
@@ -52,14 +61,33 @@ struct ContentView: View {
                         }
                     }
                 }
+                .frame(width: 300)
+                .padding()
+                .background(.ultraThickMaterial)
+                .cornerRadius(10)
+                .contentShape(Rectangle())
+                
+            } else {
+                Text ("Question \(questionNumber)")
+                
+                if !showingSettings {
+                    Text ("\(multipliers[questionNumber]) x \(multiplicands[questionNumber])")
+                        .font(Font.largeTitle.bold())
+                } else {
+                    Text("No Question")
+                        .font(Font.largeTitle.bold())
+                }
             }
             
-            VStack {
+                Text(userAnswer)
+                    .font(Font.largeTitle.bold())
+                
                 Spacer ()
                 
                 HStack {
                     ForEach(1..<4, id: \.self) { number in
                         Button {
+                            userAnswer += "\(number)"
                         } label: {
                             Text("\(number)")
                                 .digitButton()
@@ -71,6 +99,7 @@ struct ContentView: View {
                 HStack {
                     ForEach(4..<7, id: \.self) { number in
                         Button {
+                            userAnswer += "\(number)"
                         } label: {
                             Text("\(number)")
                                 .digitButton()
@@ -82,6 +111,7 @@ struct ContentView: View {
                 HStack {
                     ForEach(7..<10, id: \.self) { number in
                         Button {
+                            userAnswer += "\(number)"
                         } label: {
                             Text("\(number)")
                                 .digitButton()
@@ -93,6 +123,7 @@ struct ContentView: View {
                 
                 HStack {
                     Button {
+                        if showingSettings { genarateQuetions() }
                         showingSettings.toggle()
                     } label: {
                         Image(systemName: "gearshape")
@@ -100,25 +131,28 @@ struct ContentView: View {
                     .spacerButton()
                     
                     Button {
+                        userAnswer += "0"
                     } label: {
                         Text("\(0)")
                             .digitButton()
                     }
                     .buttonStyle(.plain)
                     
-                    Button {} label: {
+                    Button {
+                        userAnswer = ""
+                    } label: {
                         Image(systemName: "arrow.right.circle.fill")
                     }
                     .spacerButton()
                 }
                 
             }
-        }
-        .padding()
-    }
+        }    
     
     func genarateQuetions() {
         var randomMultiplier: Int = 0
+        multipliers = []
+        multiplicands = []
         
         switch difficulty {
             case .easy: randomMultiplier = 1
