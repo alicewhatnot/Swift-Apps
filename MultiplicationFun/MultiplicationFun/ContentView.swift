@@ -22,9 +22,11 @@ struct ContentView: View {
     
     @State private var correctAnswers: Int = 0
     @State private var userAnswer: String = ""
+    @State private var score: Int = 0
     
     @State private var showingSettings: Bool = true
-    
+    @State private var showingAlert = false
+
     var body: some View {
         VStack {
             if showingSettings {
@@ -60,28 +62,33 @@ struct ContentView: View {
                             Text("Hard").tag(Difficulty.hard)
                         }
                     }
-                }
+                                    }
                 .frame(width: 300)
                 .padding()
-                .background(.ultraThickMaterial)
+                .background(.white.opacity(0.75))
                 .cornerRadius(10)
                 .contentShape(Rectangle())
                 
-            } else {
-                Text ("Question \(questionNumber)")
-                
-                if !showingSettings {
-                    Text ("\(multipliers[questionNumber]) x \(multiplicands[questionNumber])")
-                        .font(Font.largeTitle.bold())
-                } else {
-                    Text("No Question")
-                        .font(Font.largeTitle.bold())
+                Button ("Play!") {
+                    if showingSettings { genarateQuetions() }
+                    showingSettings.toggle()
                 }
-            }
-            
-                Text(userAnswer)
+                    .frame(width: 200, height: 75)
+                    .background(.blue)
+                    .cornerRadius(35)
+                    .foregroundStyle(.white)
                     .font(Font.largeTitle.bold())
+                    .padding(50)
                 
+            } else {
+                Text ("Question \(questionNumber) | Score: \(score)")
+                Text ("\(multipliers[questionNumber]) x \(multiplicands[questionNumber])")
+                    .font(Font.largeTitle.bold())
+                    .padding(30)
+                Text(userAnswer)
+                    .font(Font.system(size: 50))
+                    .padding(30)
+            }
                 Spacer ()
                 
                 HStack {
@@ -123,10 +130,9 @@ struct ContentView: View {
                 
                 HStack {
                     Button {
-                        if showingSettings { genarateQuetions() }
-                        showingSettings.toggle()
+                        verifyAnswer(userAnswer)
                     } label: {
-                        Image(systemName: "gearshape")
+                        Image(systemName: "arrow.right.circle.fill")
                     }
                     .spacerButton()
                     
@@ -139,20 +145,28 @@ struct ContentView: View {
                     .buttonStyle(.plain)
                     
                     Button {
-                        userAnswer = ""
+                        userAnswer.removeLast(1)
                     } label: {
-                        Image(systemName: "arrow.right.circle.fill")
+                        Image(systemName: "delete.left")
                     }
                     .spacerButton()
                 }
                 
             }
-        }    
+            .alert("Score \(score)", isPresented: $showingAlert) {
+                Button("OK") { }
+            }
+            .frame(width: 500)
+            .background(.linearGradient(Gradient(colors: [.blue, .purple, .pink]), startPoint: .topLeading, endPoint: .bottomTrailing))
+        }
     
     func genarateQuetions() {
         var randomMultiplier: Int = 0
         multipliers = []
         multiplicands = []
+        score = 0
+        userAnswer = ""
+        questionNumber = 1
         
         switch difficulty {
             case .easy: randomMultiplier = 1
@@ -160,12 +174,36 @@ struct ContentView: View {
             case .hard: randomMultiplier = 10
         }
         
-        for _ in 0..<questionsAmount {
+        for _ in 0...questionsAmount {
             let multiplicand = "\(Int.random(in: 1...10)*randomMultiplier)"
             multiplicands.append(multiplicand)
             
             let multiplier = "\(Int.random(in: 2...multiplicationTable))"
             multipliers.append(multiplier)
+        }
+    }
+    
+    func verifyAnswer(_ answer: String) {
+        let correctAnswer = String(Int(multipliers[questionNumber])! * Int(multiplicands[questionNumber])!)
+        if answer ==  correctAnswer {
+            withAnimation {
+                score += 1
+                userAnswer = ""
+            }
+        } else {
+            userAnswer = "\(correctAnswer)"
+            withAnimation(.easeIn.delay(1)){
+                userAnswer = ""
+            }
+        }
+        
+        if questionNumber < questionsAmount {
+            questionNumber += 1
+        } else {
+            showingSettings = true
+            withAnimation {
+                showingAlert = true
+            }
         }
     }
 }
@@ -178,7 +216,7 @@ struct DigitButton: ViewModifier {
     func body(content: Content) -> some View {
         content
             .font(.system(size: 40, weight: .bold))
-            .foregroundStyle(Color.primary.opacity(0.6))
+            .foregroundStyle(Color.white)
             .frame(width: 110, height: 92)
             .background(Color.primary.opacity(0.2))
             .cornerRadius(10)
@@ -196,6 +234,7 @@ struct SpacerButton: ViewModifier {
     func body(content: Content) -> some View {
         content
             .font(.system(size: 35, weight: .bold))
+            .foregroundStyle(.white)
             .frame(width: 50, height: 32)
             .padding(30)
             .containerShape(.rect)
