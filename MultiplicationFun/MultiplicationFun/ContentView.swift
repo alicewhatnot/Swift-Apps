@@ -68,10 +68,13 @@ struct ContentView: View {
                 .background(.white.opacity(0.75))
                 .cornerRadius(10)
                 .contentShape(Rectangle())
+                .transition(.slide)
                 
                 Button ("Play!") {
                     if showingSettings { genarateQuetions() }
-                    showingSettings.toggle()
+                    withAnimation (.smooth){
+                        showingSettings.toggle()
+                    }
                 }
                     .frame(width: 200, height: 75)
                     .background(.blue)
