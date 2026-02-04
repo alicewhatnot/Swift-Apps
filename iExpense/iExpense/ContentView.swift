@@ -12,6 +12,7 @@ struct ExpenseItem: Identifiable, Codable {
     let name: String
     let type: String
     let amount: Double
+    let currency: String
 }
 
 @Observable
@@ -44,21 +45,45 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(expenses.items) { item in
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(item.name)
-                                .font(Font.headline)
-                            
-                            Text(item.type)
+                Section(header: Text("Personal")) {
+                    ForEach(expenses.items) { item in
+                        if item.type == "Personal" {
+                            HStack {
+                                Text(item.name)
+                                    .font(Font.headline)
+                                
+                                Spacer()
+                                
+                                Text(item.amount, format: .currency(code: item.currency).notation(item.amount > 999 ? .compactName : .automatic).precision(item.amount > 100 ? .fractionLength(0) : .fractionLength(2)))
+                            }
                         }
-                        
-                        Spacer()
-                        
-                        Text(item.amount, format: .currency(code: "GBP"))
+                    }
+                    .onDelete(perform: removeItems)
+                    
+                    if !expenses.items.contains(where: { $0.type == "Personal" }) {
+                        Text("You have no personal expenses.")
                     }
                 }
-                .onDelete(perform: removeItems)
+                
+                Section(header: Text("Business")) {
+                    ForEach(expenses.items) { item in
+                        if item.type == "Buisness" {
+                            HStack {
+                                Text(item.name)
+                                    .font(Font.headline)
+                                
+                                Spacer()
+                                
+                                Text(item.amount, format: .currency(code: item.currency).notation(item.amount > 999 ? .compactName : .automatic).precision(item.amount > 100 ? .fractionLength(0) : .fractionLength(2)))
+                            }
+                        }
+                    }
+                    .onDelete(perform: removeItems)
+                    
+                    if !expenses.items.contains(where: { $0.type == "Buisness" }) {
+                        Text("You have no buisness expenses.")
+                    }
+                }
             }
             .navigationTitle(("iExpense"))
             .toolbar {
