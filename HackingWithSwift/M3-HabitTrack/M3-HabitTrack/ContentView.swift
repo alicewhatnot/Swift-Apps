@@ -15,7 +15,6 @@ import SwiftUI
 struct ContentView: View {
     @State private var habits = Habits()
     @State private var showingAddHabit = false
-    @State private var showingAddHabitEvent = false
 
     var body: some View {
         NavigationStack {
@@ -31,17 +30,10 @@ struct ContentView: View {
             .toolbar {
                 Button("Add Habit") {
                     showingAddHabit = true
-                }
-                // Move this inside then we dont need a picker for the habit
-                Button ("Add Habit Event") {
-                    showingAddHabitEvent = true
-                }
+                }                
             }
             .sheet(isPresented: $showingAddHabit) {
                 AddHabit(habits: habits)
-            }
-            .sheet(isPresented: $showingAddHabitEvent) {
-                AddHabitEvent(habits: habits)
             }
         }
     }

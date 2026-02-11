@@ -11,22 +11,12 @@ struct AddHabitEvent: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var description: String = ""
-    @State private var selectedHabitID: UUID = UUID()
     @State private var date: Date = Date()
-    var habits: Habits
+    @Binding var habit: Habit
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Habit") {
-                    Picker("Habit", selection: $selectedHabitID) {
-                        ForEach(habits.items) { habit in
-                            Text(habit.name)
-                                .tag(habit.id)
-                        }
-                    }
-                }
-
                 Section("Description") {
                     TextField("Description", text: $description)
                 }
@@ -35,19 +25,15 @@ struct AddHabitEvent: View {
                 }
                 
             }
-            .navigationTitle("Add Habit")
+            .navigationTitle(habit.name)
             .toolbar {
                 Button("Save") {
-                    guard let index = habits.items.firstIndex(where: { $0.id == selectedHabitID }) else {
-                        return
-                    }
-
                     let event = Habit.HabitEvent(
                         description: description,
                         date: date
                     )
 
-                    habits.items[index].events.append(event)
+                    habit.events.append(event)
                     dismiss()
                 }
             }

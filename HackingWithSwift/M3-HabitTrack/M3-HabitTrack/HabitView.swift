@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct HabitView: View {
-    let habit: Habit
+    @State private var showingAddHabitEvent = false
+    @State var habit: Habit
     
     var body: some View {
         NavigationLink(habit.name) {
@@ -19,6 +20,10 @@ struct HabitView: View {
                     .font(.subheadline)
             }
             
+            Button ("Add Habit Event") {
+                showingAddHabitEvent = true
+            }
+            
             List {
                 ForEach(habit.events, id: \.id) { event in
                     Text(event.description)
@@ -26,9 +31,12 @@ struct HabitView: View {
                 }
             }
         }
+        .sheet(isPresented: $showingAddHabitEvent) {
+            AddHabitEvent(habit: $habit)
+        }
     }
 }
 
 #Preview {
-    // HabitView(habit: Habit)
+    // Frick
 }
