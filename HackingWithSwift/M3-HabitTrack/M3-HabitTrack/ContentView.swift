@@ -7,7 +7,8 @@
 
 import SwiftUI
 
-// I feel like I want to use the fancier navigation arrays here?
+// I feel like I want to use the fancier navigation arrays here? Or just do the challenge thing
+
 // Adding a habit event on the home screen makes you choose the event
 // Adding an event within a habit view means the habit is inferred
 
@@ -20,22 +21,7 @@ struct ContentView: View {
         NavigationStack {
             List {
                 ForEach(habits.items, id: \.id) { habit in
-                    NavigationLink(habit.name) {
-                        // Replace this with its own view
-                        VStack(alignment: .leading) {
-                            Text(habit.name)
-                                .font(.headline)
-                            Text(habit.description)
-                                .font(.subheadline)
-                        }
-                        
-                        List {
-                            ForEach(habit.events, id: \.id) { event in
-                                Text(event.description)
-                                Text(event.formattedDate)
-                            }
-                        }
-                    }
+                    HabitView(habit: habit)
                 }
                 .onDelete { offsets in
                     habits.items.remove(atOffsets: offsets)
@@ -46,7 +32,7 @@ struct ContentView: View {
                 Button("Add Habit") {
                     showingAddHabit = true
                 }
-                
+                // Move this inside then we dont need a picker for the habit
                 Button ("Add Habit Event") {
                     showingAddHabitEvent = true
                 }

@@ -10,9 +10,9 @@ import SwiftUI
 struct AddHabitEvent: View {
     @Environment(\.dismiss) private var dismiss
 
-    @State private var description = ""
-    @State private var selectedHabitID: UUID?
-    @State private var date = Date()
+    @State private var description: String = ""
+    @State private var selectedHabitID: UUID = UUID()
+    @State private var date: Date = Date()
     var habits: Habits
 
     var body: some View {
@@ -22,7 +22,7 @@ struct AddHabitEvent: View {
                     Picker("Habit", selection: $selectedHabitID) {
                         ForEach(habits.items) { habit in
                             Text(habit.name)
-                                .tag(habit.id as UUID?)
+                                .tag(habit.id)
                         }
                     }
                 }
@@ -38,8 +38,7 @@ struct AddHabitEvent: View {
             .navigationTitle("Add Habit")
             .toolbar {
                 Button("Save") {
-                    guard let id = selectedHabitID,
-                          let index = habits.items.firstIndex(where: { $0.id == id }) else {
+                    guard let index = habits.items.firstIndex(where: { $0.id == selectedHabitID }) else {
                         return
                     }
 
