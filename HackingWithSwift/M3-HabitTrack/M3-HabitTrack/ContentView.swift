@@ -9,18 +9,15 @@ import SwiftUI
 
 // I feel like I want to use the fancier navigation arrays here? Or just do the challenge thing
 
-// Adding a habit event on the home screen makes you choose the event
-// Adding an event within a habit view means the habit is inferred
-
 struct ContentView: View {
-    @State private var habits = Habits()
+    @State private var habits = Habits.load()
     @State private var showingAddHabit = false
 
     var body: some View {
         NavigationStack {
             List {
-                ForEach(habits.items, id: \.id) { habit in
-                    HabitView(habit: habit)
+                ForEach($habits.items) { $habit in
+                    HabitView(habit: $habit)
                 }
                 .onDelete { offsets in
                     habits.items.remove(atOffsets: offsets)
@@ -28,12 +25,19 @@ struct ContentView: View {
             }
             .navigationTitle("HabitTrack")
             .toolbar {
-                Button("Add Habit") {
-                    showingAddHabit = true
-                }                
+                ToolbarItem {
+                    Button {
+                        showingAddHabit = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
             }
             .sheet(isPresented: $showingAddHabit) {
                 AddHabit(habits: habits)
+            }
+            .onChange(of: habits.items) {
+                habits.save()
             }
         }
     }

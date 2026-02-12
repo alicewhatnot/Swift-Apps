@@ -25,7 +25,7 @@ struct AddHabitEvent: View {
                 }
                 
             }
-            .navigationTitle(habit.name)
+            .navigationTitle("\(habit.name) event")
             .toolbar {
                 Button("Save") {
                     let event = Habit.HabitEvent(
