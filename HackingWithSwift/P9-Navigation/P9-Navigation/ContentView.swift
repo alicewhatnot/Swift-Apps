@@ -30,8 +30,8 @@ struct ContentView: View {
                     path.append("hello")
                 }
             }
-            .navigationDestination(for: Int.self) { _ in
-                Text("int")
+            .navigationDestination(for: Int.self) { thing in
+                Text("int \(thing)")
             }
             .navigationDestination(for: String.self) { _ in
                 Text("string")

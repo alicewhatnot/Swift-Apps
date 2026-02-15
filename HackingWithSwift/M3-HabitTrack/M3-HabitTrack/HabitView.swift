@@ -12,7 +12,7 @@ struct HabitView: View {
     @Binding var habit: Habit
     
     var body: some View {
-        NavigationLink {
+            NavigationLink {
             VStack {
                 HStack {
                     Text(habit.description)
