@@ -37,13 +37,29 @@ class Order: Codable {
     var extraFrosting = false
     var adddSprinkles = false
     
-    var name = ""
-    var streetAddress = ""
-    var city = ""
-    var zip = ""
+    var name: String {
+        didSet {
+            UserDefaults.standard.set(name, forKey: "name")
+        }
+    }
+    var streetAddress: String {
+        didSet {
+            UserDefaults.standard.set(streetAddress, forKey: "streetAddress")
+        }
+    }
+    var city: String {
+        didSet {
+            UserDefaults.standard.set(city, forKey: "city")
+        }
+    }
+    var zip: String {
+        didSet {
+            UserDefaults.standard.set(zip, forKey: "zip")
+        }
+    }
     
     var hasValidAddress: Bool {
-        return !name.isEmpty && !streetAddress.isEmpty && !city.isEmpty && !zip.isEmpty
+        return validAddress(name: name, streetAddress: streetAddress, city: city, zip: zip)
     }
     
     var cost: Decimal {
@@ -64,5 +80,27 @@ class Order: Codable {
         }
         
         return cost
+    }
+    
+    func validAddress(name: String, streetAddress: String, city: String, zip: String) -> Bool {
+        let notEmpty: Bool = !name.isEmpty && !streetAddress.isEmpty && !city.isEmpty && !zip.isEmpty
+        let notWhitespace: Bool = isntJustWhitespace(string: name) && isntJustWhitespace(string: streetAddress) && isntJustWhitespace(string: city) && isntJustWhitespace(string: zip)
+        return notEmpty && notWhitespace
+    }
+    
+    func isntJustWhitespace(string: String) -> Bool {
+        for character in string {
+            if !character.isWhitespace {
+                return true
+            }
+        }
+        return false
+    }
+    
+    init() {
+        name = UserDefaults.standard.string(forKey: "name") ?? ""
+        streetAddress = UserDefaults.standard.string(forKey: "streetAddress") ?? ""
+        city = UserDefaults.standard.string(forKey: "city") ?? ""
+        zip = UserDefaults.standard.string(forKey: "zip") ?? ""
     }
 }
