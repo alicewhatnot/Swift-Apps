@@ -50,6 +50,11 @@ struct ContentView: View {
             return
         }
         
+        guard users == [] else {
+            print ("Users already loaded. No need to decode JSON.")
+            return
+        }
+        
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             
