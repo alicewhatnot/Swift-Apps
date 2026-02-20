@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		FB2BFEC32F47B4020057A31D /* M4-SwiftDataProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "M4-SwiftDataProject.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FB2BFEC32F47B4020057A31D /* P12-SwiftDataProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "P12-SwiftDataProject.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		FB2BFEC52F47B4020057A31D /* M4-SwiftDataProject */ = {
+		FB2BFEC52F47B4020057A31D /* P12-SwiftDataProject */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "M4-SwiftDataProject";
+			path = "P12-SwiftDataProject";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -32,7 +32,7 @@
 		FB2BFEBA2F47B4020057A31D = {
 			isa = PBXGroup;
 			children = (
-				FB2BFEC52F47B4020057A31D /* M4-SwiftDataProject */,
+				FB2BFEC52F47B4020057A31D /* P12-SwiftDataProject */,
 				FB2BFEC42F47B4020057A31D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -40,7 +40,7 @@
 		FB2BFEC42F47B4020057A31D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FB2BFEC32F47B4020057A31D /* M4-SwiftDataProject.app */,
+				FB2BFEC32F47B4020057A31D /* P12-SwiftDataProject.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,9 +48,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		FB2BFEC22F47B4020057A31D /* M4-SwiftDataProject */ = {
+		FB2BFEC22F47B4020057A31D /* P12-SwiftDataProject */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FB2BFECE2F47B4030057A31D /* Build configuration list for PBXNativeTarget "M4-SwiftDataProject" */;
+			buildConfigurationList = FB2BFECE2F47B4030057A31D /* Build configuration list for PBXNativeTarget "P12-SwiftDataProject" */;
 			buildPhases = (
 				FB2BFEBF2F47B4020057A31D /* Sources */,
 				FB2BFEC02F47B4020057A31D /* Frameworks */,
@@ -61,13 +61,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				FB2BFEC52F47B4020057A31D /* M4-SwiftDataProject */,
+				FB2BFEC52F47B4020057A31D /* P12-SwiftDataProject */,
 			);
-			name = "M4-SwiftDataProject";
+			name = "P12-SwiftDataProject";
 			packageProductDependencies = (
 			);
 			productName = "M4-SwiftDataProject";
-			productReference = FB2BFEC32F47B4020057A31D /* M4-SwiftDataProject.app */;
+			productReference = FB2BFEC32F47B4020057A31D /* P12-SwiftDataProject.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -85,7 +85,7 @@
 					};
 				};
 			};
-			buildConfigurationList = FB2BFEBE2F47B4020057A31D /* Build configuration list for PBXProject "M4-SwiftDataProject" */;
+			buildConfigurationList = FB2BFEBE2F47B4020057A31D /* Build configuration list for PBXProject "P12-SwiftDataProject" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -99,7 +99,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				FB2BFEC22F47B4020057A31D /* M4-SwiftDataProject */,
+				FB2BFEC22F47B4020057A31D /* P12-SwiftDataProject */,
 			);
 		};
 /* End PBXProject section */
@@ -313,7 +313,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		FB2BFEBE2F47B4020057A31D /* Build configuration list for PBXProject "M4-SwiftDataProject" */ = {
+		FB2BFEBE2F47B4020057A31D /* Build configuration list for PBXProject "P12-SwiftDataProject" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FB2BFECC2F47B4030057A31D /* Debug */,
@@ -322,7 +322,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		FB2BFECE2F47B4030057A31D /* Build configuration list for PBXNativeTarget "M4-SwiftDataProject" */ = {
+		FB2BFECE2F47B4030057A31D /* Build configuration list for PBXNativeTarget "P12-SwiftDataProject" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FB2BFECF2F47B4030057A31D /* Debug */,
