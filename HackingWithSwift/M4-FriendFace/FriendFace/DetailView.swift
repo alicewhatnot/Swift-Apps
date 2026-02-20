@@ -51,7 +51,3 @@ struct DetailView: View {
     }
 }
 
-#Preview {
-    let example = User(id: UUID(), isActive: true, name: "Alice Gillbanks", age: 17, company: "Nevado.. Kidding", address: "BS40 7AN Bristol", about: "The Coolest", registered: .now, tags: ["Coolest", "The Best", "#1 Programmer"], friends: [Friend(id: UUID(), name: "Adelaide Krech"), Friend(id: UUID(), name: "Ellie Atkins")])
-    DetailView(user: example)
-}

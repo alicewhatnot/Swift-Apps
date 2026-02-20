@@ -6,65 +6,40 @@
 //
 
 import SwiftUI
-
+import SwiftData
 
 struct ContentView: View {
-    @State private var users = [User]()
+    @Environment(\.modelContext) private var modelContext
+    @State private var showingActiveOnly = false
+    @State private var sortOrder = [
+        SortDescriptor(\User.name),
+        SortDescriptor(\User.registered)
+    ]
     
     var body: some View {
         NavigationStack {
-            List(users, id: \.id) { item in
-                NavigationLink(value: item) {
-                    VStack(alignment: .leading) {
-                        HStack {
-                            Text(item.isActive ? "🟢" : "🔵")
-                                .opacity(1)
-                                .font(.system(size: 10))
-                            Text(item.name)
-                                .font(.headline)
+            UsersView(showingActiveOnly: showingActiveOnly, sortOrder: sortOrder)
+                .navigationTitle("FriendFace")
+                .toolbar {
+                    Button(showingActiveOnly ? "Show Everyone" : "Show Active Only") {
+                        showingActiveOnly.toggle()
+                    }
+                    
+                    Menu("Sort", systemImage: "arrow.up.arrow.down") {
+                        Picker("Sort", selection: $sortOrder) {
+                            Text("Sort by Name")
+                                .tag([
+                                    SortDescriptor(\User.name),
+                                    SortDescriptor(\User.registered)
+                                ])
+                            Text("Sort by Company")
+                                .tag([
+                                    SortDescriptor(\User.company),
+                                    SortDescriptor(\User.registered)
+                                ])
                         }
-                        HStack {
-                            Text(String(item.age))
-                            Text("|")
-                            Text(item.company)
-                            Text("|")
-                            Text(String(item.friends.count))
-                        }
-                            .font(.subheadline)
                     }
                 }
-            }
-            .task {
-                await loadUsers()
-            }
-            .navigationDestination(for: User.self) { user in
-                DetailView(user: user)
-            }
-            .navigationTitle("FriendFace")
-        }
-    }
-    
-    func loadUsers() async {
-        guard let url = URL(string: "https://www.hackingwithswift.com/samples/friendface.json") else {
-            print("Invalid URL")
-            return
-        }
-        
-        guard users == [] else {
-            print ("Users already loaded. No need to decode JSON.")
-            return
-        }
-        
-        do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            
-            users = try decoder.decode([User].self, from: data)
-            
-        } catch {
-            print("Invalid data: \(error)")
         }
     }
 }
