@@ -7,19 +7,19 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		FB2BFEC32F47B4020057A31D /* SwiftDataProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftDataProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FBEA7ABB2F4CF05900FF75A2 /* BucketList.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BucketList.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		FB2BFEC52F47B4020057A31D /* SwiftDataProject */ = {
+		FBEA7ABD2F4CF05900FF75A2 /* BucketList */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = SwiftDataProject;
+			path = BucketList;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		FB2BFEC02F47B4020057A31D /* Frameworks */ = {
+		FBEA7AB82F4CF05900FF75A2 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -29,18 +29,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		FB2BFEBA2F47B4020057A31D = {
+		FBEA7AB22F4CF05900FF75A2 = {
 			isa = PBXGroup;
 			children = (
-				FB2BFEC52F47B4020057A31D /* SwiftDataProject */,
-				FB2BFEC42F47B4020057A31D /* Products */,
+				FBEA7ABD2F4CF05900FF75A2 /* BucketList */,
+				FBEA7ABC2F4CF05900FF75A2 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		FB2BFEC42F47B4020057A31D /* Products */ = {
+		FBEA7ABC2F4CF05900FF75A2 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FB2BFEC32F47B4020057A31D /* SwiftDataProject.app */,
+				FBEA7ABB2F4CF05900FF75A2 /* BucketList.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,64 +48,64 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		FB2BFEC22F47B4020057A31D /* SwiftDataProject */ = {
+		FBEA7ABA2F4CF05900FF75A2 /* BucketList */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FB2BFECE2F47B4030057A31D /* Build configuration list for PBXNativeTarget "SwiftDataProject" */;
+			buildConfigurationList = FBEA7AC62F4CF05A00FF75A2 /* Build configuration list for PBXNativeTarget "BucketList" */;
 			buildPhases = (
-				FB2BFEBF2F47B4020057A31D /* Sources */,
-				FB2BFEC02F47B4020057A31D /* Frameworks */,
-				FB2BFEC12F47B4020057A31D /* Resources */,
+				FBEA7AB72F4CF05900FF75A2 /* Sources */,
+				FBEA7AB82F4CF05900FF75A2 /* Frameworks */,
+				FBEA7AB92F4CF05900FF75A2 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				FB2BFEC52F47B4020057A31D /* SwiftDataProject */,
+				FBEA7ABD2F4CF05900FF75A2 /* BucketList */,
 			);
-			name = SwiftDataProject;
+			name = BucketList;
 			packageProductDependencies = (
 			);
-			productName = "M4-SwiftDataProject";
-			productReference = FB2BFEC32F47B4020057A31D /* SwiftDataProject.app */;
+			productName = BucketList;
+			productReference = FBEA7ABB2F4CF05900FF75A2 /* BucketList.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		FB2BFEBB2F47B4020057A31D /* Project object */ = {
+		FBEA7AB32F4CF05900FF75A2 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2610;
 				LastUpgradeCheck = 2610;
 				TargetAttributes = {
-					FB2BFEC22F47B4020057A31D = {
+					FBEA7ABA2F4CF05900FF75A2 = {
 						CreatedOnToolsVersion = 26.1.1;
 					};
 				};
 			};
-			buildConfigurationList = FB2BFEBE2F47B4020057A31D /* Build configuration list for PBXProject "SwiftDataProject" */;
+			buildConfigurationList = FBEA7AB62F4CF05900FF75A2 /* Build configuration list for PBXProject "BucketList" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = FB2BFEBA2F47B4020057A31D;
+			mainGroup = FBEA7AB22F4CF05900FF75A2;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = FB2BFEC42F47B4020057A31D /* Products */;
+			productRefGroup = FBEA7ABC2F4CF05900FF75A2 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				FB2BFEC22F47B4020057A31D /* SwiftDataProject */,
+				FBEA7ABA2F4CF05900FF75A2 /* BucketList */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		FB2BFEC12F47B4020057A31D /* Resources */ = {
+		FBEA7AB92F4CF05900FF75A2 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -115,7 +115,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		FB2BFEBF2F47B4020057A31D /* Sources */ = {
+		FBEA7AB72F4CF05900FF75A2 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -125,7 +125,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		FB2BFECC2F47B4030057A31D /* Debug */ = {
+		FBEA7AC42F4CF05A00FF75A2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -189,7 +189,7 @@
 			};
 			name = Debug;
 		};
-		FB2BFECD2F47B4030057A31D /* Release */ = {
+		FBEA7AC52F4CF05A00FF75A2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -246,7 +246,7 @@
 			};
 			name = Release;
 		};
-		FB2BFECF2F47B4030057A31D /* Debug */ = {
+		FBEA7AC72F4CF05A00FF75A2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -256,6 +256,7 @@
 				DEVELOPMENT_TEAM = WUJPG97Z3U;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "We need to unlock your data.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -266,7 +267,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "me.gillbanks.M4-SwiftDataProject";
+				PRODUCT_BUNDLE_IDENTIFIER = me.gillbanks.BucketList;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -278,7 +279,7 @@
 			};
 			name = Debug;
 		};
-		FB2BFED02F47B4030057A31D /* Release */ = {
+		FBEA7AC82F4CF05A00FF75A2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -288,6 +289,7 @@
 				DEVELOPMENT_TEAM = WUJPG97Z3U;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "We need to unlock your data.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -298,7 +300,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "me.gillbanks.M4-SwiftDataProject";
+				PRODUCT_BUNDLE_IDENTIFIER = me.gillbanks.BucketList;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -313,25 +315,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		FB2BFEBE2F47B4020057A31D /* Build configuration list for PBXProject "SwiftDataProject" */ = {
+		FBEA7AB62F4CF05900FF75A2 /* Build configuration list for PBXProject "BucketList" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				FB2BFECC2F47B4030057A31D /* Debug */,
-				FB2BFECD2F47B4030057A31D /* Release */,
+				FBEA7AC42F4CF05A00FF75A2 /* Debug */,
+				FBEA7AC52F4CF05A00FF75A2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		FB2BFECE2F47B4030057A31D /* Build configuration list for PBXNativeTarget "SwiftDataProject" */ = {
+		FBEA7AC62F4CF05A00FF75A2 /* Build configuration list for PBXNativeTarget "BucketList" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				FB2BFECF2F47B4030057A31D /* Debug */,
-				FB2BFED02F47B4030057A31D /* Release */,
+				FBEA7AC72F4CF05A00FF75A2 /* Debug */,
+				FBEA7AC82F4CF05A00FF75A2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = FB2BFEBB2F47B4020057A31D /* Project object */;
+	rootObject = FBEA7AB32F4CF05900FF75A2 /* Project object */;
 }
