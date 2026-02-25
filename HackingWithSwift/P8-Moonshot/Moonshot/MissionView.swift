@@ -76,9 +76,11 @@ struct MissionView: View {
                                         Text(CrewMember.role)
                                             .foregroundStyle(.white.opacity(0.5))
                                     }
-                                    .accessibilityElement(children: .combine)
                                 }
                                 .padding(.horizontal)
+                                .accessibilityElement(children: .ignore)
+                                .accessibilityLabel("\(CrewMember.astronaut.name), \(CrewMember.role)")
+                                .accessibilityHint("Opens astronaut details")
                             }
                         }
                     }

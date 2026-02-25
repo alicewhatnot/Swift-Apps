@@ -28,6 +28,7 @@ struct GridLayout: View {
                                 .scaledToFit()
                                 .frame(width: 100, height: 100)
                                 .padding()
+                                .accessibilityHidden(true)
                             
                             VStack {
                                 Text(mission.displayName)
@@ -47,6 +48,9 @@ struct GridLayout: View {
                             RoundedRectangle(cornerRadius: 10)
                                 .stroke(.lightBackground)
                         }
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("\(mission.displayName), \(mission.formattedLaunchDate)")
+                        .accessibilityHint("Opens mission details")
                     }
                 }
             }
@@ -85,7 +89,7 @@ struct ListLayout: View {
                                 .font(.caption)
                                 .foregroundStyle(.gray)
                         }
-                        .accessibilityElement(children: .combine)
+                        .accessibilityElement(children: .ignore)
                         .padding(.vertical)
                         .frame(maxWidth: .infinity)
                         .background(.lightBackground)
@@ -96,6 +100,9 @@ struct ListLayout: View {
                         RoundedRectangle(cornerRadius: 10)
                             .stroke(.lightBackground)
                     }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("\(mission.displayName), \(mission.formattedLaunchDate)")
+                    .accessibilityHint("Opens mission details")
                 }
                 .listRowSeparator(.hidden)
                 .background(.darkBackground)

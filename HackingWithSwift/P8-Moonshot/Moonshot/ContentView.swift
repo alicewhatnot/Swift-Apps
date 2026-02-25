@@ -27,7 +27,9 @@ struct ContentView: View {
                     showingGrid.toggle()
                 } label: {
                     Image(systemName: showingGrid ? "list.bullet" : "square.grid.2x2")
+                        .accessibilityHidden(true)
                 }
+                .accessibilityLabel(showingGrid ? "Show list view" : "Show grid view")
             }
         }
     }
