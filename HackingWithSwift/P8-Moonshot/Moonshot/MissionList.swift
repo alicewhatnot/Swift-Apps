@@ -74,6 +74,7 @@ struct ListLayout: View {
                             .scaledToFit()
                             .frame(width: 100, height: 100)
                             .padding()
+                            .accessibilityHidden(true)
 
                         VStack {
                             Text(mission.displayName)
@@ -84,6 +85,7 @@ struct ListLayout: View {
                                 .font(.caption)
                                 .foregroundStyle(.gray)
                         }
+                        .accessibilityElement(children: .combine)
                         .padding(.vertical)
                         .frame(maxWidth: .infinity)
                         .background(.lightBackground)

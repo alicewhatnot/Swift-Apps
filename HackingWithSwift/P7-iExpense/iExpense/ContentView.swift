@@ -54,6 +54,8 @@ struct ContentView: View {
                                 
                                 Text(item.amount, format: .currency(code: item.currency).notation(item.amount > 999 ? .compactName : .automatic).precision(item.amount > 100 ? .fractionLength(0) : .fractionLength(2)))
                             }
+                            .accessibilityElement(children: .combine)
+                            .accessibilityHint("A personal expense")
                         }
                     }
                     .onDelete(perform: removeItems)
@@ -74,6 +76,8 @@ struct ContentView: View {
                                 
                                 Text(item.amount, format: .currency(code: item.currency).notation(item.amount > 999 ? .compactName : .automatic).precision(item.amount > 100 ? .fractionLength(0) : .fractionLength(2)))
                             }
+                            .accessibilityElement(children: .combine)
+                            .accessibilityHint("A buisness expense")
                         }
                     }
                     .onDelete(perform: removeItems)

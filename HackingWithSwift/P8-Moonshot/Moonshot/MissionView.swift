@@ -25,6 +25,7 @@ struct MissionView: View {
                     .containerRelativeFrame(.horizontal) { width, axis in
                         width * 0.6
                     }
+                    .accessibilityLabel("\(mission.displayName) mission patch")
                 
                 HStack {
                     Text("Launch Date: \(mission.formattedLaunchDate)")
@@ -65,6 +66,7 @@ struct MissionView: View {
                                             Capsule()
                                                 .strokeBorder(.white, lineWidth: 1)
                                             )
+                                        .accessibilityHidden(true)
                                     
                                     VStack(alignment: .leading) {
                                         Text(CrewMember.astronaut.name)
@@ -74,6 +76,7 @@ struct MissionView: View {
                                         Text(CrewMember.role)
                                             .foregroundStyle(.white.opacity(0.5))
                                     }
+                                    .accessibilityElement(children: .combine)
                                 }
                                 .padding(.horizontal)
                             }
