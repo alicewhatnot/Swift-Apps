@@ -7,16 +7,29 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		FBF2283B2F50EF6800D825D7 /* SamplePackage in Frameworks */ = {isa = PBXBuildFile; productRef = FBF2283A2F50EF6800D825D7 /* SamplePackage */; };
+		FB43E6C62F51F679005DAF69 /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = FB43E6C52F51F679005DAF69 /* CodeScanner */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		FBA72D762F50E45700D4840A /* HotProspects.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HotProspects.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		FB43E6C82F51F83B005DAF69 /* Exceptions for "HotProspects" folder in "HotProspects" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = FBA72D752F50E45700D4840A /* HotProspects */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		FBA72D782F50E45700D4840A /* HotProspects */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				FB43E6C82F51F83B005DAF69 /* Exceptions for "HotProspects" folder in "HotProspects" target */,
+			);
 			path = HotProspects;
 			sourceTree = "<group>";
 		};
@@ -27,7 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FBF2283B2F50EF6800D825D7 /* SamplePackage in Frameworks */,
+				FB43E6C62F51F679005DAF69 /* CodeScanner in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,7 +83,7 @@
 			);
 			name = HotProspects;
 			packageProductDependencies = (
-				FBF2283A2F50EF6800D825D7 /* SamplePackage */,
+				FB43E6C52F51F679005DAF69 /* CodeScanner */,
 			);
 			productName = HotProspects;
 			productReference = FBA72D762F50E45700D4840A /* HotProspects.app */;
@@ -101,7 +114,7 @@
 			mainGroup = FBA72D6D2F50E45700D4840A;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				FBF228392F50EF6800D825D7 /* XCRemoteSwiftPackageReference "SamplePackage" */,
+				FB43E6C42F51F679005DAF69 /* XCRemoteSwiftPackageReference "CodeScanner" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FBA72D772F50E45700D4840A /* Products */;
@@ -265,6 +278,10 @@
 				DEVELOPMENT_TEAM = WUJPG97Z3U;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HotProspects/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = NO;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to the camera to read QR codes.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "We want to save your QR Code";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -297,6 +314,10 @@
 				DEVELOPMENT_TEAM = WUJPG97Z3U;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HotProspects/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = NO;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to the camera to read QR codes.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "We want to save your QR Code";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -343,21 +364,21 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		FBF228392F50EF6800D825D7 /* XCRemoteSwiftPackageReference "SamplePackage" */ = {
+		FB43E6C42F51F679005DAF69 /* XCRemoteSwiftPackageReference "CodeScanner" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/twostraws/SamplePackage";
+			repositoryURL = "https://github.com/twostraws/CodeScanner";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
+				minimumVersion = 2.5.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		FBF2283A2F50EF6800D825D7 /* SamplePackage */ = {
+		FB43E6C52F51F679005DAF69 /* CodeScanner */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = FBF228392F50EF6800D825D7 /* XCRemoteSwiftPackageReference "SamplePackage" */;
-			productName = SamplePackage;
+			package = FB43E6C42F51F679005DAF69 /* XCRemoteSwiftPackageReference "CodeScanner" */;
+			productName = CodeScanner;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
