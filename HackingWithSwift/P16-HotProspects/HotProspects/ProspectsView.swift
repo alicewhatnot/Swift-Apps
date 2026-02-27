@@ -19,6 +19,8 @@ struct ProspectsView: View {
     @Query(sort: \Prospect.name) var prospects: [Prospect]
     @Environment(\.modelContext) var modelContext
     
+    @Binding var sortOrder: [SortDescriptor<Prospect>]
+    
     @State private var isShowingScanner = false
     
     @State private var selectedProspects = Set<Prospect>()
@@ -39,11 +41,21 @@ struct ProspectsView: View {
     var body: some View {
         NavigationStack {
             List(prospects, selection: $selectedProspects) { prospect in
-                VStack(alignment: .leading) {
-                    Text(prospect.name)
-                        .font(.headline)
-                    Text(prospect.emailAddress)
-                        .foregroundStyle(.secondary)
+                NavigationLink(destination: DetailView(for: prospect)) {
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(prospect.name)
+                                .font(.headline)
+                            Text(prospect.emailAddress)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        if prospect.isContacted {
+                            Image(systemName: "person.fill.checkmark")
+                        } else {
+                            Image(systemName: "person.fill.xmark")
+                        }
+                    }
                 }
                 .swipeActions {
                     Button("Delete", systemImage: "trash", role: .destructive) {
@@ -67,9 +79,30 @@ struct ProspectsView: View {
                     }
                 }
                 .tag(prospect)
+                .onAppear {
+                    selectedProspects.removeAll()
+                }
             }
             .navigationTitle(title)
             .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu("Sort", systemImage: "arrow.up.arrow.down") {
+                        Picker("Sort", selection: $sortOrder) {
+                            Text("Sort by Name")
+                                .tag([
+                                    SortDescriptor(\Prospect.name),
+                                    SortDescriptor(\Prospect.dateAdded)
+                                ])
+                            
+                            Text("Sort by Date Added")
+                                .tag([
+                                    SortDescriptor(\Prospect.dateAdded),
+                                    SortDescriptor(\Prospect.name)
+                                ])
+                        }
+                    }
+                }
+                
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Scan", systemImage: "qrcode.viewfinder") {
                         isShowingScanner = true
@@ -94,15 +127,21 @@ struct ProspectsView: View {
         }
     }
     
-    init(filter: FilterType) {
+    init(filter: FilterType,
+         sortOrder: Binding<[SortDescriptor<Prospect>]>) {
+        
         self.filter = filter
+        self._sortOrder = sortOrder
         
         if filter != .none {
             let showContactedOnly = filter == .contacted
             
-            _prospects = Query(filter: #Predicate {
-                $0.isContacted == showContactedOnly
-            }, sort: [SortDescriptor(\Prospect.name)])
+            _prospects = Query(
+                filter: #Predicate { $0.isContacted == showContactedOnly },
+                sort: sortOrder.wrappedValue
+            )
+        } else {
+            _prospects = Query(sort: sortOrder.wrappedValue)
         }
     }
     
@@ -164,7 +203,3 @@ struct ProspectsView: View {
     }
 }
 
-#Preview {
-    ProspectsView(filter: .none)
-        .modelContainer(for: Prospect.self)
-}
