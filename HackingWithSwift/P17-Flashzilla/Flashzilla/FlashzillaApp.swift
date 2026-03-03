@@ -5,6 +5,7 @@
 //  Created by Michael Gillbanks on 01/03/2026.
 //
 
+import SwiftData
 import SwiftUI
 
 @main
@@ -13,5 +14,6 @@ struct FlashzillaApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: Card.self)
     }
 }

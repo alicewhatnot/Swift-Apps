@@ -5,6 +5,7 @@
 //  Created by Michael Gillbanks on 01/03/2026.
 //
 
+import SwiftData
 import SwiftUI
 internal import Combine
 
@@ -18,8 +19,10 @@ extension View {
 struct ContentView: View {
     @Environment(\.accessibilityDifferentiateWithoutColor) var accessibilityDifferentiateWithoutColor
     @Environment(\.accessibilityVoiceOverEnabled) var accessibilityVoiceOverEnabled
-
-    @State private var cards = [Card]()
+    @Environment(\.modelContext) var modelContext
+    
+    @Query var cards: [Card]
+    @State private var displayCards = [Card]()
     @State private var showingEditScreen = false
     
     @State private var timeRemaining = 100
@@ -44,20 +47,22 @@ struct ContentView: View {
                     .clipShape(.capsule)
                 
                 ZStack {
-                    ForEach(0..<cards.count, id: \.self) { index in
-                        CardView(card: cards[index]) {
-                            withAnimation {
-                                removeCard(at: index)
+                    ForEach(displayCards) { card in
+                        if let index = displayCards.firstIndex(where: { $0.id == card.id }) {
+                            CardView(card: card) { correct in
+                                withAnimation {
+                                    removeCard(card: card, correct: correct)
+                                }
                             }
+                            .stacked(at: index, in: displayCards.count)
+                            .allowsHitTesting(index == displayCards.count - 1)
+                            .accessibilityHidden(index < displayCards.count - 1)
                         }
-                            .stacked(at: index, in: cards.count)
-                            .allowsHitTesting(index == cards.count - 1)
-                            .accessibilityHidden(index < cards.count - 1)
                     }
                 }
                 .allowsHitTesting(timeRemaining > 0)
                 
-                if cards.isEmpty {
+                if displayCards.isEmpty {
                     Button("Start Again", action: resetCards)
                         .padding()
                         .background(.white)
@@ -92,7 +97,9 @@ struct ContentView: View {
                     HStack {
                         Button {
                             withAnimation {
-                                removeCard(at: cards.count - 1)
+                                if let last = displayCards.last {
+                                    removeCard(card: last, correct: false)
+                                }
                             }
                         } label: {
                             Image(systemName: "xmark.circle")
@@ -107,7 +114,9 @@ struct ContentView: View {
                         
                         Button {
                             withAnimation {
-                                removeCard(at: cards.count - 1)
+                                if let last = displayCards.last {
+                                    removeCard(card: last, correct: false)
+                                }
                             }
                         } label: {
                             Image(systemName: "checkmark.circle")
@@ -140,32 +149,28 @@ struct ContentView: View {
                 isActive = false
             }
         }
-        .sheet(isPresented: $showingEditScreen, onDismiss: resetCards) { EditCards() }
+        .sheet(isPresented: $showingEditScreen, onDismiss: resetCards) { EditCards(modelContext: modelContext, cards: cards) }
         .onAppear(perform: resetCards)
     }
-    
-    func removeCard(at index: Int) {
-        guard index >= 0 else { return }
         
-        cards.remove(at: index)
+    func removeCard(card: Card, correct: Bool) {
+        guard let index = displayCards.firstIndex(where: { $0.id == card.id }) else { return }
         
-        if cards.isEmpty {
+        let removed = displayCards.remove(at: index)
+        
+        if displayCards.isEmpty {
             isActive = false
+        }
+        
+        if !correct {
+            displayCards.insert(removed, at: 0)
         }
     }
     
     func resetCards() {
         timeRemaining = 100
         isActive = true
-        loadData()
-    }
-    
-    func loadData() {
-        if let data = UserDefaults.standard.data(forKey: "Cards") {
-            if let decoded = try? JSONDecoder().decode([Card].self, from: data) {
-                cards = decoded
-            }
-        }
+        displayCards = cards
     }
 }
 
