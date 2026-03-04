@@ -9,7 +9,7 @@ import SwiftUI
 
 struct PreviousRollsView: View {
     @Environment(\.dismiss) private var dismiss
-
+    
     var rolls: [Roll]
     
     var body: some View {
@@ -25,8 +25,13 @@ struct PreviousRollsView: View {
                         
                         Spacer()
                         
-                        Text(roll.formattedDate)
-                            .font(.subheadline)
+                        VStack {
+                            Text("\(String(roll.numberOfSides ?? 6)) Sides")
+                                .font(.subheadline)
+                            
+                            Text(roll.formattedDate)
+                                .font(.subheadline)
+                        }
                     }
                 }
             }
@@ -41,6 +46,3 @@ struct PreviousRollsView: View {
     }
 }
 
-#Preview {
-    PreviousRollsView(rolls: [])
-}
