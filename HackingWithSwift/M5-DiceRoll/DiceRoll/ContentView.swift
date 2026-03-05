@@ -7,33 +7,45 @@
 
 import SwiftData
 import SwiftUI
+import UIKit
+internal import Combine
 
 struct ContentView: View {
+    @Environment(\.accessibilityReduceMotion) var accessibilityReduceMotion
     @Environment(\.modelContext) var modelContext
     @Query(sort: \Roll.date, order: .reverse) var rolls: [Roll]
 
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     let maxSavedRolls = 100
     
     @State private var numberOfSides: Double = 6
     @State private var numberOfRolls: Double = 1
     @State private var dieResult = 6
     @State private var showingPreviousRolls = false
+    @State private var numberOfUpdates = 1
+    @State private var isRolling = false
     
     var body: some View {
         NavigationStack {
             VStack {
-                // Future functionality replace this with an automatically scrolling grid or just random numbers, see rollDie()
                 Text(String(dieResult))
                     .font(.system(size: 250, weight: .bold))
-                
+                    .accessibilityHidden(isRolling)
+            
                 Spacer()
                 
                 Button("Roll Die") {
-                    for _ in 0..<Int(numberOfRolls) {
-                        rollDie()
+                    Task {
+                        for _ in 0..<Int(numberOfRolls) {
+                            await rollDie()
+                            UIAccessibility.post(
+                                notification: .announcement,
+                                argument: "Result \(dieResult)"
+                            )
+                        }
                     }
                 }
-                
+                .sensoryFeedback(.impact(weight: .heavy, intensity: 1), trigger: numberOfUpdates)
                 .padding()
                 .frame(width: 200)
                 .font(.largeTitle)
@@ -45,10 +57,15 @@ struct ContentView: View {
                     Slider(value: $numberOfSides, in: 1...100, step: 1)
                     Text("Sides: \(Int(numberOfSides))")
                         .font(.headline)
+                        .sensoryFeedback(.increase, trigger: numberOfSides)
+                        .accessibilityLabel("Number of sides")
                     
                     Slider(value: $numberOfRolls, in: 1...10, step: 1)
                     Text("Number Of Rolls: \(Int(numberOfRolls))")
                         .font(.headline)
+                        .sensoryFeedback(.increase, trigger: numberOfRolls)
+                        .accessibilityLabel("Number of rolls")
+
                 }
                 .padding(.horizontal, 50)
                 .padding(.vertical, 20)
@@ -62,20 +79,39 @@ struct ContentView: View {
         }
     }
     
-    func rollDie() {
-        // Every time this is called it will wait like a second to roll the die
-        // This will give a very satisfying result with multiple die rolls where it will roll, stop then roll again
+    func rollDie(duration: Double = 2) async {
+        isRolling = true
+
+        if !accessibilityReduceMotion {
+            let startTime = Date()
+            
+            while true {
+                let elapsed = Date().timeIntervalSince(startTime)
+                
+                if elapsed >= duration {
+                    numberOfUpdates = 1
+                    break
+                }
+                
+                let progress = elapsed / duration
+                let curve = pow(1-progress, 3)
+                
+                if Double.random(in: 0...1) < curve {
+                    numberOfUpdates += 1
+                    dieResult = Int.random(in: 1...Int(numberOfSides))
+                }
+                
+                try? await Task.sleep(nanoseconds: 50_000_000)
+            }
+        } else {
+            dieResult = Int.random(in: 1...Int(numberOfSides))
+            try? await Task.sleep(nanoseconds: 100_000_000)
+        }
         
-        dieResult = Int.random(in: 1...Int(numberOfSides))
+        isRolling = false
+
         modelContext.insert(Roll(dieResult, in: Int(numberOfSides)))
-        
         trimRolls()
-        
-        #if DEBUG
-        // For deleting during testing
-        //try? modelContext.delete(model: Roll.self)
-        #endif
-        
         try? modelContext.save()
     }
     
