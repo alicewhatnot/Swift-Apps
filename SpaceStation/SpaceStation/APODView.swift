@@ -53,23 +53,21 @@ struct APODView: View {
             .preferredColorScheme(.dark)
             .navigationTitle(apod.title)
             .task {
-                await loadData()
+                await loadAPOD()
             }
         }
     }
     
-    // modify this to be a global func that takes an api key, data to save at and url to take from
-    func loadData() async {
+    func loadAPOD() async {
         guard let url = URL(string: "https://api.nasa.gov/planetary/apod?api_key=\(api_key)") else {
             print("Invalid URL")
             return
         }
+
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            let decodedResponse = try JSONDecoder().decode(APOD.self, from: data)
-            apod = decodedResponse
+            apod = try await NetworkService.fetch(from: url, as: APOD.self)
         } catch {
-            print("Invalid data")
+            print("Failed to load APOD:", error)
         }
     }
 }
