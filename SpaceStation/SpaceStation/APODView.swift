@@ -29,11 +29,11 @@ struct APODView: View {
                     AsyncImage(url: apod.decodedUrl) { image in
                         image
                             .resizable()
-                            .scaledToFill()
+                            .scaledToFit()
                     } placeholder: {
                         Color.gray
                     }
-                    .frame(width: 350, height: 350)
+                    .frame(width: 350)
                     .cornerRadius(20)
                     .padding(.top)
                     .clipped()
@@ -50,12 +50,19 @@ struct APODView: View {
                     .padding()
                 
             }
+            .background(
+                Image("stars")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+                    .opacity(0.5)
+            )
+
             .preferredColorScheme(.dark)
             .navigationTitle(apod.title)
             .task {
                 await loadAPOD()
             }
-            .defaultBackground()
         }
     }
     

@@ -52,11 +52,17 @@ struct NearEarthObjectsView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+                .listRowBackground(Color.black.opacity(0.5))
             }
-            .padding()
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
+            .background(
+                Image("stars")
+                    .resizable()
+                    .opacity(0.5)
+                    .scaledToFill()
+                    .ignoresSafeArea()
+            )
             .navigationTitle("Cataclysmic Events")
+            .scrollContentBackground(.hidden)
             .preferredColorScheme(.dark)
             .task {
                 await loadNEOs()
@@ -69,7 +75,6 @@ struct NearEarthObjectsView: View {
                     }
                 }
             }
-            .defaultBackground()
         }
     }
 
