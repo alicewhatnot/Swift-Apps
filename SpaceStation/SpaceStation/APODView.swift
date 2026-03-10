@@ -19,7 +19,7 @@ struct APOD: Codable {
 }
 
 struct APODView: View {
-    @State private var api_key = "zdWedlYa0U8CeAAcw8Jkb1IOeFGzsWMHOyPvIFAL"
+    @Environment(\.API_KEY) var api_key
     @State private var apod = APOD.placeholder
     
     var body: some View {
@@ -55,6 +55,7 @@ struct APODView: View {
             .task {
                 await loadAPOD()
             }
+            .defaultBackground()
         }
     }
     
