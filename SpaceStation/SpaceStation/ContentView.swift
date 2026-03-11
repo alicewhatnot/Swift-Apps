@@ -24,6 +24,15 @@ struct ContentView: View {
                 .tabItem {
                     Label("Asteroids", systemImage: "sparkles")
                 }
+            
+            // This is not very interesting and very badly put together
+            // Consider replacing with a non-nasa api or just remove entirely
+            // Will still have an events view for the earth events
+            // That one is theoretically updated within hours
+            SpaceEventsView()
+                .tabItem {
+                    Label("Space Events", systemImage: "calendar")
+                }
         }
     }
 }

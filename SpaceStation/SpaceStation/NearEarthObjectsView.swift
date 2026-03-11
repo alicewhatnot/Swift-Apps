@@ -54,13 +54,8 @@ struct NearEarthObjectsView: View {
                 }
                 .listRowBackground(Color.black.opacity(0.5))
             }
-            .background(
-                Image("stars")
-                    .resizable()
-                    .opacity(0.5)
-                    .scaledToFill()
-                    .ignoresSafeArea()
-            )
+            .defaultBackground(withStreaks: true)
+
             .navigationTitle("Cataclysmic Events")
             .scrollContentBackground(.hidden)
             .preferredColorScheme(.dark)
@@ -68,10 +63,15 @@ struct NearEarthObjectsView: View {
                 await loadNEOs()
             }
             .toolbar {
-                Menu("Sort", systemImage: "line.horizontal.3.decrease") {
+                Menu {
                     Picker("Filter", selection: $filter) {
-                        Text("Show Hazardous").tag(Filter.potentiallyHazardous)
-                        Text("Show All Nearby").tag(Filter.all)
+                        Text("Hazardous").tag(Filter.potentiallyHazardous)
+                        Text("All Nearby").tag(Filter.all)
+                    }
+                } label: {
+                    HStack {
+                        Text("Filter")
+                        Image(systemName: "line.horizontal.3.decrease")
                     }
                 }
             }
@@ -79,11 +79,8 @@ struct NearEarthObjectsView: View {
     }
 
     func loadNEOs() async {
-        let startDate = Date()
-        let endDate = startDate.addingTimeInterval(604800)
-
         guard let url = URL(
-            string: "https://api.nasa.gov/neo/rest/v1/feed?start_date=\(dateToString(startDate))&end_date=\(dateToString(endDate))&api_key=\(api_key)"
+            string: "https://api.nasa.gov/neo/rest/v1/feed?api_key=\(api_key)"
         ) else {
             print("Invalid URL")
             return

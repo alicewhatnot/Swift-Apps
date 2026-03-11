@@ -15,7 +15,7 @@ struct APOD: Codable {
     let url: String
 
     var decodedUrl: URL? { URL(string: url) }
-    static let placeholder = APOD(copyright: nil, explanation: "Loading Description...", media_type: "image", title: "Loading APOD...", url: "")
+    static let placeholder = APOD(copyright: nil, explanation: "", media_type: "image", title: "Loading APOD...", url: "")
 }
 
 struct APODView: View {
@@ -25,17 +25,30 @@ struct APODView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
+                Text(apod.title)
+                    .font(.title2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+                
                 ZStack(alignment: .bottomLeading) {
+                    
+                    
                     AsyncImage(url: apod.decodedUrl) { image in
                         image
                             .resizable()
                             .scaledToFit()
                     } placeholder: {
-                        Color.gray
+                        Image(systemName: "photo")
+                            .font(.system(size: 40))
+                            .symbolRenderingMode(.hierarchical)
+                            .padding()
+                            .opacity(0.6)
+                            .frame(height: 200)
                     }
-                    .frame(width: 350)
+                    .frame(maxWidth: .infinity)
                     .cornerRadius(20)
                     .padding(.top)
+                    .padding(.horizontal, 0.5)
                     .clipped()
                     
                     if apod.copyright != nil {
@@ -46,20 +59,19 @@ struct APODView: View {
                     }
                 }
                 Text(apod.explanation)
-                    .font(.system(size: 20, weight: .regular, design: .default))
+                    .font(.system(size: 20, weight: .regular, design: .default)).opacity(0.8)
                     .padding()
                 
             }
             .background(
                 Image("stars")
                     .resizable()
-                    .scaledToFill()
                     .ignoresSafeArea()
                     .opacity(0.5)
             )
 
             .preferredColorScheme(.dark)
-            .navigationTitle(apod.title)
+            .navigationTitle("Picture of the Day")
             .task {
                 await loadAPOD()
             }
