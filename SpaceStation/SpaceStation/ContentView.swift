@@ -33,6 +33,11 @@ struct ContentView: View {
                 .tabItem {
                     Label("Space Events", systemImage: "calendar")
                 }
+            
+            EONETView()
+                .tabItem {
+                    Label("Earth Events", systemImage: "globe")
+                }
         }
     }
 }

@@ -8,8 +8,12 @@
 import Foundation
 
 struct NetworkService {
-    static func fetch<T: Decodable>(from url: URL, as type: T.Type) async throws -> T {
+    static func fetch<T: Decodable>(
+        from url: URL,
+        as type: T.Type,
+        decoder: JSONDecoder = JSONDecoder()
+    ) async throws -> T {
         let (data, _) = try await URLSession.shared.data(from: url)
-        return try JSONDecoder().decode(T.self, from: data)
+        return try decoder.decode(T.self, from: data)
     }
 }
