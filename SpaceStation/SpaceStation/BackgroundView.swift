@@ -75,7 +75,7 @@ extension View {
         ZStack {
             Image("stars")
                 .resizable()
-                .opacity(0.5)
+                .opacity(0.3)
                 .ignoresSafeArea()
 
             // Using and false to disable the broken streaks

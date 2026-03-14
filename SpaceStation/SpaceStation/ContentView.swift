@@ -17,26 +17,22 @@ struct ContentView: View {
         TabView {
             APODView()
                 .tabItem {
-                    Label("APOD", systemImage: "sun.max")
+                    Label("APOD", systemImage: "photo.artframe")
                 }
             
             NearEarthObjectsView()
                 .tabItem {
-                    Label("Asteroids", systemImage: "sparkles")
+                    Label("Asteroids", systemImage: "bubbles.and.sparkles")
                 }
             
-            // This is not very interesting and very badly put together
-            // Consider replacing with a non-nasa api or just remove entirely
-            // Will still have an events view for the earth events
-            // That one is theoretically updated within hours
             SpaceEventsView()
                 .tabItem {
-                    Label("Space Events", systemImage: "calendar")
+                    Label("Space Events", systemImage: "moon.stars")
                 }
             
             EONETView()
                 .tabItem {
-                    Label("Earth Events", systemImage: "globe")
+                    Label("Earth Events", systemImage: "globe.europe.africa")
                 }
         }
     }

@@ -6,6 +6,19 @@
 //
 
 import SwiftUI
+import WebKit
+
+struct WebView: UIViewRepresentable {
+    let url: URL
+    
+    func makeUIView(context: Context) -> WKWebView {
+        return WKWebView()
+    }
+    
+    func updateUIView(_ uiView: WKWebView, context: Context) {
+        uiView.load(URLRequest(url: url))
+    }
+}
 
 struct APOD: Codable {
     let copyright: String?
@@ -33,23 +46,32 @@ struct APODView: View {
                 ZStack(alignment: .bottomLeading) {
                     
                     
-                    AsyncImage(url: apod.decodedUrl) { image in
-                        image
-                            .resizable()
-                            .scaledToFit()
-                    } placeholder: {
-                        Image(systemName: "photo")
-                            .font(.system(size: 40))
-                            .symbolRenderingMode(.hierarchical)
-                            .padding()
-                            .opacity(0.6)
+                    if apod.media_type == "video", let url = apod.decodedUrl {
+                        WebView(url: url)
+                            .frame(height: 220)
+                            .cornerRadius(20)
+                            .padding(.top)
+                    } else {
+                        AsyncImage(url: apod.decodedUrl) { image in
+                            image
+                                .resizable()
+                                .scaledToFit()
+                        } placeholder: {
+                            VStack {
+                                Image(systemName: "photo")
+                                    .font(.system(size: 40))
+                                    .symbolRenderingMode(.hierarchical)
+                                    .padding()
+                                    .opacity(0.6)
+                                ProgressView()
+                            }
                             .frame(height: 200)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .cornerRadius(20)
+                        .padding(.top)
+                        .clipped()
                     }
-                    .frame(maxWidth: .infinity)
-                    .cornerRadius(20)
-                    .padding(.top)
-                    .padding(.horizontal, 0.5)
-                    .clipped()
                     
                     if apod.copyright != nil {
                         Text("CC: \(apod.copyright!)")
@@ -59,7 +81,7 @@ struct APODView: View {
                     }
                 }
                 Text(apod.explanation)
-                    .font(.system(size: 20, weight: .regular, design: .default)).opacity(0.8)
+                    .font(.system(size: 20, weight: .regular, design: .default)).opacity(0.7)
                     .padding()
                 
             }

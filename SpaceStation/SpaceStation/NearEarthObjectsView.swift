@@ -1,5 +1,5 @@
 //
-//  SwiftUIView.swift
+//  NearEarthObjectsView.swift
 //  SpaceStation
 //
 //  Created by Michael Gillbanks on 08/03/2026.
@@ -10,7 +10,7 @@ import SwiftUI
 struct NearEarthObjectsView: View {
     @Environment(\.API_KEY) var api_key
     @State private var neoFeed: NEOFeed?
-    
+
     enum Filter {
         case all, potentiallyHazardous
     }
@@ -18,45 +18,52 @@ struct NearEarthObjectsView: View {
 
     var body: some View {
         NavigationStack {
-            let asteroids = neoFeed?.allAsteroids(filterHazardous: filter == .potentiallyHazardous) ?? []
-            
-            List(asteroids) { asteroid in
-                let approach = asteroid.close_approach_data.first
-                
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack {
-                        if asteroid.is_potentially_hazardous_asteroid && filter == .all {
-                            Text("⚠️")
-                                .font(.caption)
+            Group {
+                if let neoFeed {
+                    let asteroids = neoFeed.allAsteroids(filterHazardous: filter == .potentiallyHazardous)
+
+                    List(asteroids) { asteroid in
+                        let approach = asteroid.close_approach_data.first
+
+                        NavigationLink(destination: NearEarthObjectDetailView(asteroid: asteroid)) {
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack {
+                                    if asteroid.is_potentially_hazardous_asteroid && filter == .all {
+                                        Text("⚠️")
+                                            .font(.caption)
+                                    }
+                                    Text(asteroid.name)
+                                        .font(.headline)
+                                }
+
+                                Text("Diameter: \(asteroid.diameterKM, specifier: "%.2f") km")
+                                    .font(.subheadline)
+
+                                if let distance = approach?.missDistanceKM {
+                                    Text("Miss distance: \(distance, specifier: "%.0f") km")
+                                        .font(.caption)
+                                }
+
+                                if let velocity = approach?.velocityKMPerSecond {
+                                    Text("Velocity: \(velocity, specifier: "%.0f") km/s")
+                                        .font(.caption)
+                                }
+
+                                if let approachDate = approach?.formattedApproachDate() {
+                                    Text("Closest approach: \(approachDate) (\(approach?.timeToApproach ?? ""))")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
                         }
-                        Text(asteroid.name)
-                            .font(.headline)
+                        .listRowBackground(Color.black.opacity(0.5))
                     }
-                    
-                    Text("Diameter: \(asteroid.diameterKM, specifier: "%.2f") km")
-                        .font(.subheadline)
-                    
-                    if let distance = approach?.missDistanceKM {
-                        Text("Miss distance: \(distance, specifier: "%.0f") km")
-                            .font(.caption)
-                    }
-                    
-                    if let velocity = approach?.velocityKMPerSecond {
-                        Text("Velocity: \(velocity, specifier: "%.0f") km/s")
-                            .font(.caption)
-                    }
-                    
-                    if let approachDate = approach?.formattedApproachDate() {
-                        Text("Closest approach: \(approachDate) (\(approach?.timeToApproach ?? ""))")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
+                } else {
+                    ProgressView("Loading asteroids...")
                 }
-                .listRowBackground(Color.black.opacity(0.5))
             }
             .defaultBackground(withStreaks: true)
-
-            .navigationTitle("Cataclysmic Events")
+            .navigationTitle("Near Earth Objects")
             .scrollContentBackground(.hidden)
             .preferredColorScheme(.dark)
             .task {
@@ -79,9 +86,7 @@ struct NearEarthObjectsView: View {
     }
 
     func loadNEOs() async {
-        guard let url = URL(
-            string: "https://api.nasa.gov/neo/rest/v1/feed?api_key=\(api_key)"
-        ) else {
+        guard let url = URL(string: "https://api.nasa.gov/neo/rest/v1/feed?api_key=\(api_key)") else {
             print("Invalid URL")
             return
         }
@@ -91,12 +96,6 @@ struct NearEarthObjectsView: View {
         } catch {
             print("Failed to load NEOs:", error)
         }
-    }
-
-    func dateToString(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: date)
     }
 }
 
