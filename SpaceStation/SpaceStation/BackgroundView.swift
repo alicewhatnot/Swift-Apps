@@ -28,29 +28,38 @@ struct Streak: View {
             .opacity(opacity)
             .position(x: x, y: y)
             .onAppear {
+                // Spread initial positions across the whole screen, not just the top
                 x = .random(in: 0...size.width)
+                y = .random(in: 0...size.height)
                 animate()
             }
     }
-    
+
     func animate() {
-        // Snap to starting position with no animation
+        // Pick a fresh random start along the top (and a bit left of screen
+        // to account for the diagonal drift)
+        let startX = CGFloat.random(in: -100...size.width)
+        let startY = CGFloat.random(in: -80 ... -20)
+        let duration = Double.random(in: 1.5...3)
+        let drift = CGFloat.random(in: 200...400)
+
         withAnimation(.linear(duration: 0)) {
-            y = -50
-            x = .random(in: 0...size.width)
+            x = startX
+            y = startY
             opacity = 0
         }
-        
-        // Small delay to let the reset render, then animate downward
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-            opacity = 1
-            withAnimation(.linear(duration: Double.random(in: 1.5...3))) {
+            withAnimation(.linear(duration: duration)) {
+                opacity = 1
+            }
+            withAnimation(.linear(duration: duration)) {
                 y = size.height + 50
-                x += CGFloat.random(in: 200...400)
+                x = startX + drift  // use startX as base, not accumulated x
                 opacity = 0
             }
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + Double.random(in: 3...8)) {
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double.random(in: 2...6)) {
                 animate()
             }
         }
@@ -71,15 +80,21 @@ struct StreakLayer: View {
 }
 
 extension View {
-    func defaultBackground(withStreaks: Bool = false) -> some View {
+    func defaultBackground(withStreaks: Bool = true) -> some View {
         ZStack {
-            Image("stars")
-                .resizable()
-                .opacity(0.3)
-                .ignoresSafeArea()
+            // Use a screen-size GeometryReader so the image never
+            // reacts to content layout changes above it
+            GeometryReader { geo in
+                Image("stars")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: geo.size.width, height: geo.size.height)
+                    .clipped()
+                    .opacity(0.3)
+            }
+            .ignoresSafeArea()
 
-            // Using and false to disable the broken streaks
-            if withStreaks && false {
+            if withStreaks {
                 StreakLayer()
             }
 

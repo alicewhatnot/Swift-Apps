@@ -6,35 +6,25 @@
 //
 
 import SwiftUI
+import SwiftData
 import WebKit
 
 struct WebView: UIViewRepresentable {
     let url: URL
-    
-    func makeUIView(context: Context) -> WKWebView {
-        return WKWebView()
-    }
-    
+    func makeUIView(context: Context) -> WKWebView { WKWebView() }
     func updateUIView(_ uiView: WKWebView, context: Context) {
         uiView.load(URLRequest(url: url))
     }
 }
 
-struct APOD: Codable {
-    let copyright: String?
-    let explanation: String
-    let media_type: String
-    let title: String
-    let url: String
-
-    var decodedUrl: URL? { URL(string: url) }
-    static let placeholder = APOD(copyright: nil, explanation: "", media_type: "image", title: "Loading APOD...", url: "")
-}
-
 struct APODView: View {
     @Environment(\.API_KEY) var api_key
+    @Environment(\.modelContext) var modelContext
+    @Query private var cachedAPODs: [CachedAPOD]
+
     @State private var apod = APOD.placeholder
-    
+    @State private var isLoading = true
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -42,10 +32,8 @@ struct APODView: View {
                     .font(.title2)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
-                
-                ZStack(alignment: .bottomLeading) {
-                    
-                    
+
+                ZStack(alignment: .topLeading) {
                     if apod.media_type == "video", let url = apod.decodedUrl {
                         WebView(url: url)
                             .frame(height: 220)
@@ -53,9 +41,7 @@ struct APODView: View {
                             .padding(.top)
                     } else {
                         AsyncImage(url: apod.decodedUrl) { image in
-                            image
-                                .resizable()
-                                .scaledToFit()
+                            image.resizable().scaledToFit()
                         } placeholder: {
                             VStack {
                                 Image(systemName: "photo")
@@ -63,7 +49,7 @@ struct APODView: View {
                                     .symbolRenderingMode(.hierarchical)
                                     .padding()
                                     .opacity(0.6)
-                                ProgressView()
+                                if isLoading { ProgressView() }
                             }
                             .frame(height: 200)
                         }
@@ -72,50 +58,60 @@ struct APODView: View {
                         .padding(.top)
                         .clipped()
                     }
-                    
-                    if apod.copyright != nil {
-                        Text("CC: \(apod.copyright!)")
+
+                    if let copyright = apod.copyright {
+                        Text("CC: \(copyright)")
+                            .font(.caption2)
                             .background(.secondary.opacity(0.5))
-                            .foregroundStyle(Color.white)
-                            .offset(x: 5, y: -5)
+                            .foregroundStyle(.white)
+                            .offset(x: 5, y: 10)
                     }
                 }
-                Text(apod.explanation)
-                    .font(.system(size: 20, weight: .regular, design: .default)).opacity(0.7)
-                    .padding()
-                
-            }
-            .background(
-                Image("stars")
-                    .resizable()
-                    .ignoresSafeArea()
-                    .opacity(0.5)
-            )
 
+                Text(apod.explanation)
+                    .font(.system(size: 17))
+                    .foregroundStyle(.secondary)
+                    .padding()
+            }
+            .defaultBackground()
             .preferredColorScheme(.dark)
             .navigationTitle("Picture of the Day")
-            .task {
-                await loadAPOD()
-            }
+            .task { await loadAPOD() }
+            .refreshable { await refreshFromNetwork() }
         }
     }
-    
-    func loadAPOD() async {
-        guard let url = URL(string: "https://api.nasa.gov/planetary/apod?api_key=\(api_key)") else {
-            print("Invalid URL")
-            return
-        }
 
+    func loadAPOD() async {
+        let todayString = {
+            let f = DateFormatter()
+            f.dateFormat = "yyyy-MM-dd"
+            return f.string(from: .now)
+        }()
+
+        if let cached = cachedAPODs.first,
+           cached.apodDate == todayString,
+           !cached.isStale,
+           let decoded = try? JSONDecoder().decode(APOD.self, from: cached.jsonData) {
+            apod = decoded
+            isLoading = false
+        } else {
+            await refreshFromNetwork()
+        }
+    }
+
+    func refreshFromNetwork() async {
         do {
-            apod = try await NetworkService.fetch(from: url, as: APOD.self)
+            apod = try await CacheService.fetchAndCacheAPOD(
+                apiKey: api_key,
+                context: modelContext
+            )
         } catch {
             print("Failed to load APOD:", error)
         }
+        isLoading = false
     }
 }
 
 #Preview {
     APODView()
 }
-
-

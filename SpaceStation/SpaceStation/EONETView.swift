@@ -6,10 +6,14 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct EONETView: View {
+    @Environment(\.modelContext) var modelContext
+    @Query private var cachedFeeds: [CachedEONETFeed]
 
     @State private var events: [EONETEvent] = []
+    @State private var isLoading = true
     @State private var selectedCategory: String = "All"
 
     var availableCategories: [String] {
@@ -17,15 +21,13 @@ struct EONETView: View {
     }
 
     var filteredEvents: [EONETEvent] {
-        events.filter { event in
-            selectedCategory == "All" || event.category == selectedCategory
-        }
+        events.filter { selectedCategory == "All" || $0.category == selectedCategory }
     }
 
     var sortedEvents: [EONETEvent] {
-        filteredEvents.sorted(by: {
+        filteredEvents.sorted {
             $0.latestGeometry?.date ?? .distantPast > $1.latestGeometry?.date ?? .distantPast
-        })
+        }
     }
 
     var body: some View {
@@ -36,8 +38,7 @@ struct EONETView: View {
                         NavigationLink(destination: EONETEventDetailView(event: event)) {
                             VStack(alignment: .leading, spacing: 6) {
                                 HStack {
-                                    Text(event.title)
-                                        .font(.headline)
+                                    Text(event.title).font(.headline)
                                     Spacer()
                                     if event.isClosed {
                                         Text("Closed")
@@ -48,17 +49,14 @@ struct EONETView: View {
                                             .cornerRadius(6)
                                     }
                                 }
-
                                 Text(event.category)
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
-
                                 if let geometry = event.latestGeometry {
                                     Text(geometry.date, style: .date)
                                         .font(.caption)
                                         .opacity(0.7)
                                 }
-
                                 if let description = event.description {
                                     Text(description)
                                         .font(.caption)
@@ -70,8 +68,14 @@ struct EONETView: View {
                         }
                         .listRowBackground(Color.black.opacity(0.5))
                     }
-                } else {
+                } else if isLoading {
                     ProgressView("Loading events...")
+                } else {
+                    ContentUnavailableView(
+                        "No Events",
+                        systemImage: "antenna.radiowaves.left.and.right",
+                        description: Text("No Earth events found.")
+                    )
                 }
             }
             .defaultBackground(withStreaks: true)
@@ -89,13 +93,10 @@ struct EONETView: View {
                         }
                     }
                 }
-
                 ToolbarItem {
                     Menu {
                         ForEach(availableCategories, id: \.self) { category in
-                            Button(category) {
-                                selectedCategory = category
-                            }
+                            Button(category) { selectedCategory = category }
                         }
                     } label: {
                         Text("Filter")
@@ -103,26 +104,31 @@ struct EONETView: View {
                     }
                 }
             }
-            .task {
-                await loadEvents()
-            }
+            .task { await loadEvents() }
+            .refreshable { await refreshFromNetwork() }
         }
     }
 
     func loadEvents() async {
-        guard let url = URL(string: "https://eonet.gsfc.nasa.gov/api/v2.1/events?days=30") else { return }
-
-        do {
+        if let cached = cachedFeeds.first, !cached.isStale {
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
-            let response = try await NetworkService.fetch(from: url, as: EONETResponse.self, decoder: decoder)
+            if let response = try? decoder.decode(EONETResponse.self, from: cached.jsonData) {
+                events = response.events
+                isLoading = false
+                return
+            }
+        }
+        await refreshFromNetwork()
+    }
+
+    func refreshFromNetwork() async {
+        do {
+            let response = try await CacheService.fetchAndCacheEONET(context: modelContext)
             events = response.events
         } catch {
-            print(error)
+            print("Failed to load EONET:", error)
         }
+        isLoading = false
     }
-}
-
-#Preview {
-    EONETView()
 }

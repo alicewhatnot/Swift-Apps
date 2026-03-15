@@ -6,43 +6,30 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct SpaceEvent: Identifiable {
     let id: String
     let type: String
-    let date: String        // formatted display string
-    let rawDate: String     // ISO 8601 for sorting
+    let date: String
+    let rawDate: String
     let detail: String
-    // Extra fields — populated where available
-    let classType: String?      // Solar flares: "M1.1", "C2.0" etc.
-    let sourceLocation: String? // e.g. "N10W70"
-    let peakTime: String?       // Solar flares
-    let endTime: String?        // Solar flares
-    let location: String?       // IPS: "Earth" etc.
+    let classType: String?
+    let sourceLocation: String?
+    let peakTime: String?
+    let endTime: String?
+    let location: String?
     let catalog: String?
     let link: URL?
 }
 
 struct SpaceEventsView: View {
+    @Environment(\.API_KEY) var api_key
+    @Environment(\.modelContext) var modelContext
+    @Query private var cachedEvents: [CachedSpaceEvents]
+
     @State private var events = [SpaceEvent]()
     @State private var isLoading = true
-    @Environment(\.API_KEY) var api_key
-    
-    @State private var selectedCategory: String = "All"
-    
-    var availableCategories: [String] {
-        ["All"] + Set(events.map { $0.type }).sorted()
-    }
-    
-    var filteredEvents: [SpaceEvent] {
-        events.filter { event in
-            if selectedCategory == "All" {
-                return true
-            } else {
-                return event.type == selectedCategory
-            }
-        }
-    }
 
     var body: some View {
         NavigationStack {
@@ -56,12 +43,11 @@ struct SpaceEventsView: View {
                         description: Text("No space weather events in the past 7 days.")
                     )
                 } else {
-                    List(filteredEvents) { event in
+                    List(events) { event in
                         NavigationLink(destination: SpaceEventDetailView(event: event)) {
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack {
-                                    Text(event.type)
-                                        .font(.headline)
+                                    Text(event.type).font(.headline)
                                     Spacer()
                                     if let cls = event.classType {
                                         Text(cls)
@@ -76,7 +62,9 @@ struct SpaceEventsView: View {
                                 Text(event.date)
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
-                                
+                                if let loc = event.sourceLocation {
+                                    Text(loc).font(.caption).foregroundStyle(.tertiary)
+                                }
                                 if !event.detail.isEmpty {
                                     Text(event.detail)
                                         .font(.caption)
@@ -90,27 +78,12 @@ struct SpaceEventsView: View {
                     }
                 }
             }
-            .navigationTitle("Past Space Events")
+            .navigationTitle("Past Events")
             .defaultBackground(withStreaks: true)
             .scrollContentBackground(.hidden)
             .preferredColorScheme(.dark)
-            .task {
-                await loadAllEvents()
-            }
-            .toolbar {
-                ToolbarItem {
-                    Menu {
-                        ForEach(availableCategories, id: \.self) { category in
-                            Button(category) {
-                                selectedCategory = category
-                            }
-                        }
-                    } label: {
-                        Text("Filter")
-                        Image(systemName: "line.3.horizontal.decrease")
-                    }
-                }
-            }
+            .task { await loadEvents() }
+            .refreshable { await refreshFromNetwork() }
         }
     }
 
@@ -123,107 +96,27 @@ struct SpaceEventsView: View {
         }
     }
 
-    func loadAllEvents() async {
-        let endDate = Date()
-        let startDate = endDate.addingTimeInterval(-604_800)
-        let start = queryDateString(startDate)
-        let end = queryDateString(endDate)
-        let key = api_key
-
-        let endpoints: [(String, String)] = [
-            ("Coronal Mass Ejection",       "https://api.nasa.gov/DONKI/CME?startDate=\(start)&endDate=\(end)&api_key=\(key)"),
-            ("Geomagnetic Storm",           "https://api.nasa.gov/DONKI/GST?startDate=\(start)&endDate=\(end)&api_key=\(key)"),
-            ("Interplanetary Shock",        "https://api.nasa.gov/DONKI/IPS?startDate=\(start)&endDate=\(end)&catalog=ALL&api_key=\(key)"),
-            ("Solar Flare",                 "https://api.nasa.gov/DONKI/FLR?startDate=\(start)&endDate=\(end)&api_key=\(key)"),
-            ("Solar Energetic Particle",    "https://api.nasa.gov/DONKI/SEP?startDate=\(start)&endDate=\(end)&api_key=\(key)"),
-            ("Magnetopause Crossing",       "https://api.nasa.gov/DONKI/MPC?startDate=\(start)&endDate=\(end)&api_key=\(key)"),
-            ("Radiation Belt Enhancement",  "https://api.nasa.gov/DONKI/RBE?startDate=\(start)&endDate=\(end)&api_key=\(key)"),
-            ("High Speed Stream",           "https://api.nasa.gov/DONKI/HSS?startDate=\(start)&endDate=\(end)&api_key=\(key)")
-        ]
-
-        var allEvents = [SpaceEvent]()
-
-        await withTaskGroup(of: [SpaceEvent].self) { group in
-            for (type, urlString) in endpoints {
-                guard let url = URL(string: urlString) else { continue }
-                group.addTask {
-                    await fetchEvents(type: type, from: url)
-                }
-            }
-            for await result in group {
-                allEvents.append(contentsOf: result)
-            }
+    func loadEvents() async {
+        if let cached = cachedEvents.first, !cached.isStale,
+           let serialized = try? JSONDecoder().decode([SerializableSpaceEvent].self, from: cached.jsonData) {
+            events = serialized.map { $0.toSpaceEvent(formatDate: formatEventDate) }
+            isLoading = false
+        } else {
+            await refreshFromNetwork()
         }
-
-        events = allEvents.sorted { $0.rawDate > $1.rawDate }
-        isLoading = false
     }
 
-    func fetchEvents(type: String, from url: URL) async -> [SpaceEvent] {
+    func refreshFromNetwork() async {
         do {
-            let data = try await NetworkService.fetch(from: url, as: [[String: AnyCodable]].self)
-
-            return data.compactMap { dict -> SpaceEvent? in
-                // Date — FLR uses beginTime; CME/GST use startTime; IPS/HSS use eventTime
-                let startTime   = dict["startTime"]?.stringValue
-                let beginTime   = dict["beginTime"]?.stringValue
-                let eventTime   = dict["eventTime"]?.stringValue
-                let time21_5    = dict["time21_5"]?.stringValue
-                let rawDate     = startTime ?? beginTime ?? eventTime ?? time21_5 ?? ""
-
-                // ID
-                let activityID  = dict["activityID"]?.stringValue
-                let gstID       = dict["gstID"]?.stringValue
-                let sepID       = dict["sepID"]?.stringValue
-                let mpcID       = dict["mpcID"]?.stringValue
-                let rbeID       = dict["rbeID"]?.stringValue
-                let hssID       = dict["hssID"]?.stringValue
-                let flrID       = dict["flrID"]?.stringValue
-                let id: String  = activityID ?? gstID ?? sepID ?? mpcID ?? rbeID ?? hssID ?? flrID ?? UUID().uuidString
-
-                // Detail — use note only, skip "M2M_CATALOG" catalog fallback
-                let noteRaw     = dict["note"]?.stringValue
-                let detail      = (noteRaw?.isEmpty == false) ? (noteRaw ?? "") : ""
-
-                // Extra fields
-                let classRaw    = dict["classType"]?.stringValue
-                let classType   = (classRaw?.isEmpty == false) ? classRaw : nil
-
-                let locRaw      = dict["sourceLocation"]?.stringValue
-                let sourceLocation = (locRaw?.isEmpty == false) ? locRaw : nil
-
-                let peakRaw     = dict["peakTime"]?.stringValue
-                let peakTime    = peakRaw.map { formatEventDate($0) }
-
-                let endRaw      = dict["endTime"]?.stringValue
-                let endTime     = endRaw.map { formatEventDate($0) }
-
-                let locationRaw = dict["location"]?.stringValue
-                let location    = (locationRaw?.isEmpty == false) ? locationRaw : nil
-
-                let catalog     = dict["catalog"]?.stringValue
-                let linkString  = dict["link"]?.stringValue
-                let link        = linkString.flatMap { URL(string: $0) }
-
-                return SpaceEvent(
-                    id: id,
-                    type: type,
-                    date: formatEventDate(rawDate),
-                    rawDate: rawDate,
-                    detail: detail,
-                    classType: classType,
-                    sourceLocation: sourceLocation,
-                    peakTime: peakTime,
-                    endTime: endTime,
-                    location: location,
-                    catalog: catalog,
-                    link: link
-                )
-            }
+            let serialized = try await CacheService.fetchAndCacheSpaceEvents(
+                apiKey: api_key,
+                context: modelContext
+            )
+            events = serialized.map { $0.toSpaceEvent(formatDate: formatEventDate) }
         } catch {
-            print("Failed to load \(type):", error)
-            return []
+            print("Failed to load space events:", error)
         }
+        isLoading = false
     }
 
     func formatEventDate(_ rawDate: String) -> String {
@@ -231,7 +124,6 @@ struct SpaceEventsView: View {
 
         var fixed = rawDate
 
-        // DONKI sometimes omits seconds (HH:mmZ)
         if fixed.range(of: #"T\d{2}:\d{2}Z"#, options: .regularExpression) != nil {
             fixed = fixed.replacingOccurrences(of: "Z", with: ":00Z")
         }
@@ -247,12 +139,6 @@ struct SpaceEventsView: View {
         }
 
         return rawDate
-    }
-
-    func queryDateString(_ date: Date) -> String {
-        let f = DateFormatter()
-        f.dateFormat = "yyyy-MM-dd"
-        return f.string(from: date)
     }
 }
 
@@ -272,7 +158,6 @@ private let donkiFormatter: DateFormatter = {
 
 struct AnyCodable: Codable {
     let value: Any
-
     var stringValue: String? { value as? String }
 
     init(from decoder: Decoder) throws {
