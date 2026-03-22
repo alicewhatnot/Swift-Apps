@@ -10,6 +10,7 @@ import SwiftData
 
 struct EONETView: View {
     @Environment(\.modelContext) var modelContext
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
     @Query private var cachedFeeds: [CachedEONETFeed]
 
     @State private var events: [EONETEvent] = []
@@ -47,24 +48,27 @@ struct EONETView: View {
                                             .padding(.vertical, 2)
                                             .background(.red.opacity(0.3))
                                             .cornerRadius(6)
+                                            .accessibilityLabel("Event closed")
                                     }
                                 }
                                 Text(event.category)
                                     .font(.subheadline)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(.primary.opacity(0.75)) // was .secondary
                                 if let geometry = event.latestGeometry {
                                     Text(geometry.date, style: .date)
                                         .font(.caption)
-                                        .opacity(0.7)
+                                        .foregroundStyle(.primary.opacity(0.7)) // was .opacity(0.7) on .secondary
                                 }
                                 if let description = event.description {
                                     Text(description)
                                         .font(.caption)
                                         .lineLimit(2)
-                                        .opacity(0.8)
+                                        .foregroundStyle(.primary.opacity(0.75)) // was .opacity(0.8) implicit grey
                                 }
                             }
                             .padding(.vertical, 4)
+                            .accessibilityElement(children: .combine)
+                            .accessibilityLabel(accessibilityLabel(for: event))
                         }
                         .listRowBackground(Color.black.opacity(0.5))
                     }
@@ -78,7 +82,7 @@ struct EONETView: View {
                     )
                 }
             }
-            .defaultBackground(withStreaks: true)
+            .defaultBackground(reduceMotion: reduceMotion)
             .scrollContentBackground(.hidden)
             .preferredColorScheme(.dark)
             .navigationTitle("Earth Events")
@@ -92,6 +96,7 @@ struct EONETView: View {
                             Image(systemName: "map")
                         }
                     }
+                    .accessibilityLabel("Show events on map")
                 }
                 ToolbarItem {
                     Menu {
@@ -102,11 +107,23 @@ struct EONETView: View {
                         Text("Filter")
                         Image(systemName: "line.3.horizontal.decrease")
                     }
+                    .accessibilityLabel("Filter by category")
+                    .accessibilityHint("Currently showing: \(selectedCategory)")
                 }
             }
             .task { await loadEvents() }
             .refreshable { await refreshFromNetwork() }
         }
+    }
+
+    func accessibilityLabel(for event: EONETEvent) -> String {
+        var parts = [event.title, event.category]
+        if event.isClosed { parts.append("closed") }
+        if let date = event.latestGeometry?.date {
+            parts.append(date.formatted(date: .abbreviated, time: .omitted))
+        }
+        if let description = event.description { parts.append(description) }
+        return parts.joined(separator: ", ")
     }
 
     func loadEvents() async {

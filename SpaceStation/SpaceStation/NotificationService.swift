@@ -32,6 +32,7 @@ struct NotificationService {
         apiKey: String,
         context: ModelContext
     ) async {
+
         do {
             // Fetch fresh data (also updates the cache as a side effect)
             let feed = try await CacheService.fetchAndCacheNEOs(apiKey: apiKey, context: context)
@@ -113,23 +114,41 @@ struct NotificationService {
 
     #if DEBUG
     private static func fireDebugRefreshNotification(hazardousCount: Int, newCount: Int) async {
+        print("🔔 DEBUG: fireDebugRefreshNotification called")
         let center = UNUserNotificationCenter.current()
         let settings = await center.notificationSettings()
-        guard settings.authorizationStatus == .authorized else { return }
+        print("🔔 DEBUG: auth status = \(settings.authorizationStatus.rawValue)")
+        // 0=notDetermined, 1=denied, 2=authorized, 3=provisional, 4=ephemeral
+        guard settings.authorizationStatus == .authorized else {
+            print("🔔 DEBUG: not authorized, bailing")
+            return
+        }
 
         let content = UNMutableNotificationContent()
         content.title = "⚙️ Background Refresh Fired"
         content.body = "Found \(hazardousCount) hazardous NEOs, \(newCount) new."
-        content.subtitle = DateFormatter.localizedString(from: .now, dateStyle: .none, timeStyle: .medium)
         content.sound = .default
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
 
         let request = UNNotificationRequest(
             identifier: "debug-refresh-\(Date().timeIntervalSince1970)",
             content: content,
-            trigger: nil
+            trigger: trigger
         )
 
-        try? await center.add(request)
+        do {
+            try await center.add(request)
+            print("🔔 DEBUG: notification scheduled successfully")
+        } catch {
+            print("🔔 DEBUG: failed to add notification: \(error)")
+        }
+        
+        let pending = await center.pendingNotificationRequests()
+        let delivered = await center.deliveredNotifications()
+        print("🔔 DEBUG: pending=\(pending.count), delivered=\(delivered.count)")
+        
+        
     }
     #endif
 }

@@ -7,19 +7,11 @@
 
 import SwiftUI
 import SwiftData
-import WebKit
-
-struct WebView: UIViewRepresentable {
-    let url: URL
-    func makeUIView(context: Context) -> WKWebView { WKWebView() }
-    func updateUIView(_ uiView: WKWebView, context: Context) {
-        uiView.load(URLRequest(url: url))
-    }
-}
 
 struct APODView: View {
     @Environment(\.API_KEY) var api_key
     @Environment(\.modelContext) var modelContext
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
     @Query private var cachedAPODs: [CachedAPOD]
 
     @State private var apod = APOD.placeholder
@@ -35,10 +27,9 @@ struct APODView: View {
 
                 ZStack(alignment: .topLeading) {
                     if apod.media_type == "video", let url = apod.decodedUrl {
-                        WebView(url: url)
-                            .frame(height: 220)
-                            .cornerRadius(20)
+                        YouTubeThumbnailView(url: url)
                             .padding(.top)
+                            .accessibilityLabel("Video: \(apod.title). Tap to open in YouTube.")
                     } else {
                         AsyncImage(url: apod.decodedUrl) { image in
                             image.resizable().scaledToFit()
@@ -49,6 +40,7 @@ struct APODView: View {
                                     .symbolRenderingMode(.hierarchical)
                                     .padding()
                                     .opacity(0.6)
+                                    .accessibilityHidden(true)
                                 if isLoading { ProgressView() }
                             }
                             .frame(height: 200)
@@ -57,6 +49,7 @@ struct APODView: View {
                         .cornerRadius(20)
                         .padding(.top)
                         .clipped()
+                        .accessibilityLabel(apod.copyright != nil ? "Astronomy photo: \(apod.title). Copyright \(apod.copyright!)" : "Astronomy photo: \(apod.title)")
                     }
 
                     if let copyright = apod.copyright {
@@ -65,15 +58,16 @@ struct APODView: View {
                             .background(.secondary.opacity(0.5))
                             .foregroundStyle(.white)
                             .offset(x: 5, y: 10)
+                            .accessibilityHidden(true) // spoken as part of image label above
                     }
                 }
 
                 Text(apod.explanation)
                     .font(.system(size: 17))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.primary.opacity(0.85)) // was .secondary — lifted for contrast
                     .padding()
             }
-            .defaultBackground()
+            .defaultBackground(reduceMotion: reduceMotion)
             .preferredColorScheme(.dark)
             .navigationTitle("Picture of the Day")
             .task { await loadAPOD() }
@@ -109,6 +103,54 @@ struct APODView: View {
             print("Failed to load APOD:", error)
         }
         isLoading = false
+    }
+}
+
+struct YouTubeThumbnailView: View {
+    let url: URL
+
+    var videoID: String? {
+        let str = url.absoluteString
+        if let range = str.range(of: "embed/") {
+            let id = str[range.upperBound...]
+            return String(id.prefix(while: { $0 != "?" && $0 != "&" }))
+        }
+        if let range = str.range(of: "youtu.be/") {
+            let id = str[range.upperBound...]
+            return String(id.prefix(while: { $0 != "?" && $0 != "&" }))
+        }
+        return nil
+    }
+
+    var thumbnailURL: URL? {
+        guard let id = videoID else { return nil }
+        return URL(string: "https://img.youtube.com/vi/\(id)/hqdefault.jpg")
+    }
+
+    var body: some View {
+        Button {
+            UIApplication.shared.open(url)
+        } label: {
+            ZStack {
+                AsyncImage(url: thumbnailURL) { image in
+                    image.resizable().scaledToFill()
+                } placeholder: {
+                    Rectangle().fill(.secondary.opacity(0.2))
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 220)
+                .clipped()
+                .cornerRadius(20)
+                .accessibilityHidden(true)
+
+                Image(systemName: "play.circle.fill")
+                    .font(.system(size: 60))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .shadow(radius: 10)
+                    .accessibilityHidden(true)
+            }
+        }
+        .padding(.horizontal)
     }
 }
 

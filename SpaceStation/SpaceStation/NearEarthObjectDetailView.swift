@@ -9,6 +9,7 @@ import SwiftUI
 
 struct NearEarthObjectDetailView: View {
     let asteroid: NearEarthObject
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
 
     var body: some View {
         let approach = asteroid.close_approach_data.first
@@ -45,21 +46,26 @@ struct NearEarthObjectDetailView: View {
                         HStack(spacing: 4) {
                             Image(systemName: "clock")
                                 .font(.caption)
+                                .accessibilityHidden(true)
                             Text("Closest approach in \(timeToApproach)")
                                 .font(.caption)
                         }
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.primary.opacity(0.75))
                     }
                 }
                 .padding()
                 .background(.white.opacity(0.05))
                 .clipShape(RoundedRectangle(cornerRadius: 16))
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel(headerAccessibilityLabel(asteroid: asteroid, approach: approach))
 
                 // Miss distance bar
                 if let dist = approach?.missDistanceKM {
                     SectionCard(title: "Miss Distance", systemImage: "arrow.left.and.right") {
                         MissDistanceBar(missDistanceKM: dist)
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(missDistanceAccessibilityLabel(dist: dist, approach: approach))
                 }
 
                 // Close approach
@@ -76,6 +82,8 @@ struct NearEarthObjectDetailView: View {
                         }
                         InfoRow(label: "Orbiting", value: approach.orbiting_body)
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(closeApproachAccessibilityLabel(approach: approach))
                 }
 
                 // Physical characteristics
@@ -88,6 +96,8 @@ struct NearEarthObjectDetailView: View {
                     InfoRow(label: "Magnitude", value: String(format: "H = %.1f", asteroid.absolute_magnitude_h))
                     InfoRow(label: "Size class", value: sizeClass(asteroid.diameterKM))
                 }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel(physicalCharacteristicsAccessibilityLabel(asteroid: asteroid))
 
                 // Orbital data
                 if let orbital = asteroid.orbital_data,
@@ -95,6 +105,8 @@ struct NearEarthObjectDetailView: View {
                     SectionCard(title: "Orbital Data", systemImage: "arrow.clockwise.circle") {
                         InfoRow(label: "First Observed", value: firstObserved)
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Orbital data, first observed \(firstObserved)")
                 }
 
                 // All approach dates if there are multiple
@@ -107,20 +119,31 @@ struct NearEarthObjectDetailView: View {
                                     Circle()
                                         .fill(index == 0 ? Color.blue : .secondary.opacity(0.4))
                                         .frame(width: 7, height: 7)
+                                        .accessibilityHidden(true)
                                     Text(ca.formattedApproachDate())
                                         .font(.subheadline)
                                     Spacer()
                                     if let dist = ca.missDistanceKM {
                                         Text("\(Int(dist).formatted()) km")
                                             .font(.caption.monospacedDigit())
-                                            .foregroundStyle(.secondary)
+                                            .foregroundStyle(.primary.opacity(0.75))
                                     }
                                 }
+                                .accessibilityElement(children: .combine)
+                                .accessibilityLabel({
+                                    var label = index == 0 ? "Nearest: " : ""
+                                    label += ca.formattedApproachDate()
+                                    if let dist = ca.missDistanceKM {
+                                        label += ", miss distance \(Int(dist).formatted()) kilometres"
+                                    }
+                                    return label
+                                }())
                             }
                             if asteroid.close_approach_data.count > 8 {
                                 Text("+ \(asteroid.close_approach_data.count - 8) more")
                                     .font(.caption)
-                                    .foregroundStyle(.tertiary)
+                                    .foregroundStyle(.primary.opacity(0.5))
+                                    .accessibilityLabel("\(asteroid.close_approach_data.count - 8) more approaches not shown")
                             }
                         }
                     }
@@ -130,8 +153,49 @@ struct NearEarthObjectDetailView: View {
         }
         .navigationTitle("Asteroid Detail")
         .navigationBarTitleDisplayMode(.inline)
-        .defaultBackground(withStreaks: false)
+        .defaultBackground(reduceMotion: reduceMotion)
         .preferredColorScheme(.dark)
+    }
+
+    // MARK: - Accessibility label helpers
+
+    func headerAccessibilityLabel(asteroid: NearEarthObject, approach: CloseApproach?) -> String {
+        var parts = [asteroid.name]
+        parts.append(asteroid.is_potentially_hazardous_asteroid ? "potentially hazardous" : "low risk")
+        if let timeToApproach = approach?.timeToApproach {
+            parts.append("closest approach in \(timeToApproach)")
+        }
+        return parts.joined(separator: ", ")
+    }
+
+    func missDistanceAccessibilityLabel(dist: Double, approach: CloseApproach?) -> String {
+        var parts = ["Miss distance \(Int(dist).formatted()) kilometres"]
+        let auValue = Double(approach?.miss_distance.astronomical ?? "0") ?? 0
+        parts.append(String(format: "%.4f astronomical units", auValue))
+        return parts.joined(separator: ", ")
+    }
+
+    func closeApproachAccessibilityLabel(approach: CloseApproach) -> String {
+        var parts = ["Close approach", "date \(approach.formattedApproachDate())"]
+        if let dist = approach.missDistanceKM {
+            parts.append("miss distance \(Int(dist).formatted()) kilometres")
+        }
+        if let vel = approach.velocityKMPerSecond {
+            parts.append("velocity \(Int(vel)) kilometres per second")
+        }
+        parts.append("orbiting \(approach.orbiting_body)")
+        return parts.joined(separator: ", ")
+    }
+
+    func physicalCharacteristicsAccessibilityLabel(asteroid: NearEarthObject) -> String {
+        let minM = Int(asteroid.estimated_diameter.kilometers.estimated_diameter_min * 1000)
+        let maxM = Int(asteroid.estimated_diameter.kilometers.estimated_diameter_max * 1000)
+        return [
+            "Physical characteristics",
+            String(format: "diameter approximately %.3f kilometres, between \(minM) and \(maxM) metres", asteroid.diameterKM),
+            String(format: "absolute magnitude H equals %.1f", asteroid.absolute_magnitude_h),
+            "size class \(sizeClass(asteroid.diameterKM))"
+        ].joined(separator: ", ")
     }
 
     func sizeClass(_ km: Double) -> String {
@@ -151,33 +215,31 @@ struct NearEarthObjectDetailView: View {
 struct MissDistanceBar: View {
     let missDistanceKM: Double
 
-    // 0.5 AU ≈ 74.8M km — covers the vast majority of tracked NEO passes
-    static let maxKM:            Double = 75_000_000
-    static let lunarDistanceKM:  Double = 384_400
-    static let hazardThresholdKM: Double = 7_480_000  // 0.05 AU — NASA hazardous threshold
+    static let maxKM:             Double = 75_000_000
+    static let lunarDistanceKM:   Double = 384_400
+    static let hazardThresholdKM: Double = 7_480_000
 
     var fraction: Double {
-        // Use a square root scale so close passes aren't invisible at the far left
         let linear = max(0, min(1, missDistanceKM / Self.maxKM))
         return sqrt(linear)
     }
 
     var proximityLabel: String {
         switch missDistanceKM {
-        case ..<Self.lunarDistanceKM:        return "Within lunar distance"
-        case ..<Self.hazardThresholdKM:      return "Within hazard threshold"
-        case ..<20_000_000:                  return "Close pass"
-        case ..<40_000_000:                  return "Moderate pass"
-        default:                             return "Distant pass"
+        case ..<Self.lunarDistanceKM:    return "Within lunar distance"
+        case ..<Self.hazardThresholdKM:  return "Within hazard threshold"
+        case ..<20_000_000:              return "Close pass"
+        case ..<40_000_000:              return "Moderate pass"
+        default:                         return "Distant pass"
         }
     }
 
     var markerColor: Color {
         switch missDistanceKM {
-        case ..<Self.lunarDistanceKM:        return .red
-        case ..<Self.hazardThresholdKM:      return .orange
-        case ..<20_000_000:                  return .yellow
-        default:                             return .green
+        case ..<Self.lunarDistanceKM:    return .red
+        case ..<Self.hazardThresholdKM:  return .orange
+        case ..<20_000_000:              return .yellow
+        default:                         return .green
         }
     }
 
@@ -191,7 +253,7 @@ struct MissDistanceBar: View {
                 Spacer()
                 Text(proximityLabel)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.primary.opacity(0.75))
             }
 
             GeometryReader { geo in
@@ -200,12 +262,10 @@ struct MissDistanceBar: View {
                 let hazardX   = trackWidth * sqrt(Self.hazardThresholdKM / Self.maxKM)
 
                 ZStack(alignment: .leading) {
-                    // Track
                     Capsule()
                         .fill(.white.opacity(0.08))
                         .frame(height: 6)
 
-                    // Filled portion
                     Capsule()
                         .fill(LinearGradient(
                             colors: [.red, .orange, .yellow, .green],
@@ -215,13 +275,11 @@ struct MissDistanceBar: View {
                         .frame(width: markerX, height: 6)
                         .animation(.easeOut(duration: 0.9), value: fraction)
 
-                    // Hazard threshold reference tick (0.05 AU)
                     Rectangle()
                         .fill(.white.opacity(0.3))
                         .frame(width: 1.5, height: 16)
                         .offset(x: hazardX - 0.75, y: -5)
 
-                    // Marker diamond at the asteroid's position
                     Image(systemName: "diamond.fill")
                         .font(.system(size: 10))
                         .foregroundStyle(markerColor)
@@ -230,23 +288,24 @@ struct MissDistanceBar: View {
                 }
             }
             .frame(height: 32)
+            .accessibilityHidden(true) // distance spoken by parent SectionCard label
 
-            // Scale labels
             HStack {
                 Text("Earth")
                     .font(.caption2)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.primary.opacity(0.4))
                 Spacer()
                 Text("⚠️ 0.05 AU")
                     .font(.caption2)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.primary.opacity(0.4))
                 Spacer()
                 Spacer()
                 Spacer()
                 Text("0.5 AU")
                     .font(.caption2)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.primary.opacity(0.4))
             }
+            .accessibilityHidden(true) // scale labels are visual context only
         }
     }
 }

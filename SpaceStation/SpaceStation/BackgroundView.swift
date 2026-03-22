@@ -80,7 +80,8 @@ struct StreakLayer: View {
 }
 
 extension View {
-    func defaultBackground(withStreaks: Bool = true) -> some View {
+    func defaultBackground(reduceMotion: Bool = false) -> some View {
+        
         ZStack {
             // Use a screen-size GeometryReader so the image never
             // reacts to content layout changes above it
@@ -94,7 +95,7 @@ extension View {
             }
             .ignoresSafeArea()
 
-            if withStreaks {
+            if !reduceMotion {
                 StreakLayer()
             }
 

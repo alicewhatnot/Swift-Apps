@@ -26,24 +26,36 @@ struct SpaceEvent: Identifiable {
 struct SpaceEventsView: View {
     @Environment(\.API_KEY) var api_key
     @Environment(\.modelContext) var modelContext
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
     @Query private var cachedEvents: [CachedSpaceEvents]
 
     @State private var events = [SpaceEvent]()
     @State private var isLoading = true
+    @State private var selectedType: String = "All"
+
+    var availableTypes: [String] {
+        ["All"] + Set(events.map { $0.type }).sorted()
+    }
+
+    var filteredEvents: [SpaceEvent] {
+        events.filter { selectedType == "All" || $0.type == selectedType }
+    }
 
     var body: some View {
         NavigationStack {
             Group {
                 if isLoading {
                     ProgressView("Loading space events...")
-                } else if events.isEmpty {
+                } else if filteredEvents.isEmpty {
                     ContentUnavailableView(
                         "No Events",
                         systemImage: "antenna.radiowaves.left.and.right",
-                        description: Text("No space weather events in the past 7 days.")
+                        description: Text(selectedType == "All"
+                            ? "No space weather events in the past 7 days."
+                            : "No \(selectedType) events in the past 7 days.")
                     )
                 } else {
-                    List(events) { event in
+                    List(filteredEvents) { event in
                         NavigationLink(destination: SpaceEventDetailView(event: event)) {
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack {
@@ -57,34 +69,62 @@ struct SpaceEventsView: View {
                                             .background(classTypeColor(cls).opacity(0.25))
                                             .foregroundStyle(classTypeColor(cls))
                                             .clipShape(Capsule())
+                                            .accessibilityLabel("Class \(cls)")
                                     }
                                 }
                                 Text(event.date)
                                     .font(.subheadline)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(.primary.opacity(0.75))
                                 if let loc = event.sourceLocation {
-                                    Text(loc).font(.caption).foregroundStyle(.tertiary)
+                                    Text(loc)
+                                        .font(.caption)
+                                        .foregroundStyle(.primary.opacity(0.6))
                                 }
                                 if !event.detail.isEmpty {
                                     Text(event.detail)
                                         .font(.caption)
-                                        .foregroundStyle(.secondary)
+                                        .foregroundStyle(.primary.opacity(0.75))
                                         .lineLimit(2)
                                 }
                             }
                             .padding(.vertical, 4)
+                            .accessibilityElement(children: .combine)
+                            .accessibilityLabel(accessibilityLabel(for: event))
                         }
                         .listRowBackground(Color.black.opacity(0.5))
                     }
                 }
             }
-            .navigationTitle("Past Events")
-            .defaultBackground(withStreaks: true)
+            .navigationTitle("Space Events")
+            .defaultBackground(reduceMotion: reduceMotion)
             .scrollContentBackground(.hidden)
             .preferredColorScheme(.dark)
+            .toolbar {
+                ToolbarItem {
+                    Menu {
+                        ForEach(availableTypes, id: \.self) { type in
+                            Button(type) { selectedType = type }
+                        }
+                    } label: {
+                        Text("Filter")
+                        Image(systemName: "line.3.horizontal.decrease")
+                    }
+                    .accessibilityLabel("Filter by event type")
+                    .accessibilityHint("Currently showing: \(selectedType)")
+                }
+            }
             .task { await loadEvents() }
             .refreshable { await refreshFromNetwork() }
         }
+    }
+
+    func accessibilityLabel(for event: SpaceEvent) -> String {
+        var parts = [event.type]
+        if let cls = event.classType { parts.append("class \(cls)") }
+        parts.append(event.date)
+        if let loc = event.sourceLocation { parts.append("source: \(loc)") }
+        if !event.detail.isEmpty { parts.append(event.detail) }
+        return parts.joined(separator: ", ")
     }
 
     func classTypeColor(_ cls: String) -> Color {
@@ -121,23 +161,13 @@ struct SpaceEventsView: View {
 
     func formatEventDate(_ rawDate: String) -> String {
         guard !rawDate.isEmpty else { return "Unknown date" }
-
         var fixed = rawDate
-
         if fixed.range(of: #"T\d{2}:\d{2}Z"#, options: .regularExpression) != nil {
             fixed = fixed.replacingOccurrences(of: "Z", with: ":00Z")
         }
-
         let iso = ISO8601DateFormatter()
-
-        if let date = iso.date(from: fixed) {
-            return displayFormatter.string(from: date)
-        }
-
-        if let date = donkiFormatter.date(from: rawDate) {
-            return displayFormatter.string(from: date)
-        }
-
+        if let date = iso.date(from: fixed) { return displayFormatter.string(from: date) }
+        if let date = donkiFormatter.date(from: rawDate) { return displayFormatter.string(from: date) }
         return rawDate
     }
 }

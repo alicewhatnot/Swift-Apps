@@ -51,11 +51,11 @@ struct SpaceStationApp: App {
                         for: UIApplication.didBecomeActiveNotification
                     )
                 ) { _ in
-                    // Check for new hazardous asteroids every time the app comes to foreground
+                    let apiKey = Bundle.main.object(forInfoDictionaryKey: "NASA_API_KEY") as? String ?? ""
                     Task {
                         let context = modelContainer.mainContext
                         await NotificationService.checkForNewHazardousAsteroids(
-                            apiKey: api_key,
+                            apiKey: apiKey,
                             context: context
                         )
                         BackgroundTaskService.scheduleBackgroundRefresh()

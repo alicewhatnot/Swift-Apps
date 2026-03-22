@@ -25,7 +25,11 @@ struct BackgroundTaskService {
             forTaskWithIdentifier: taskIdentifier,
             using: nil
         ) { task in
-            guard let refreshTask = task as? BGAppRefreshTask else { return }
+            print("🔧 DEBUG: background task handler fired")
+            guard let refreshTask = task as? BGAppRefreshTask else {
+                print("🔧 DEBUG: wrong task type")
+                return
+            }
             handleBackgroundRefresh(task: refreshTask, apiKey: apiKey, modelContainer: modelContainer)
         }
     }

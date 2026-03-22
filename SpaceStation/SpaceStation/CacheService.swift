@@ -23,6 +23,7 @@ struct CacheService {
             throw URLError(.badURL)
         }
         let (data, _) = try await URLSession.shared.data(from: url)
+
         let feed = try JSONDecoder().decode(NEOFeed.self, from: data)
 
         // Delete any existing cache entry and replace
@@ -135,6 +136,7 @@ struct CacheService {
     ) async -> [SerializableSpaceEvent] {
         do {
             let data = try await NetworkService.fetch(from: url, as: [[String: AnyCodable]].self)
+            print(data)
             return data.compactMap { dict -> SerializableSpaceEvent? in
                 let startTime  = dict["startTime"]?.stringValue
                 let beginTime  = dict["beginTime"]?.stringValue

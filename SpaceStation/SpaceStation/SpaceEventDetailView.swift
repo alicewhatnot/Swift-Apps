@@ -2,18 +2,20 @@
 //  SpaceEventDetailView.swift
 //  SpaceStation
 //
-//  Created by Michael Gillbanks on 14/03/2026.
+//  Created by Michael Gillbanks on 22/03/2026.
 //
 
 import SwiftUI
 
 struct SpaceEventDetailView: View {
     let event: SpaceEvent
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
 
+                // Header card
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 4) {
@@ -21,7 +23,7 @@ struct SpaceEventDetailView: View {
                                 .font(.title2.bold())
                             Text(event.date)
                                 .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(.primary.opacity(0.75))
                         }
                         Spacer()
                         if let cls = event.classType {
@@ -32,12 +34,15 @@ struct SpaceEventDetailView: View {
                                 .background(classTypeColor(cls).opacity(0.25))
                                 .foregroundStyle(classTypeColor(cls))
                                 .clipShape(Capsule())
+                                .accessibilityLabel("Class \(cls)")
                         }
                     }
                 }
                 .padding()
                 .background(.white.opacity(0.05))
                 .clipShape(RoundedRectangle(cornerRadius: 16))
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel(headerAccessibilityLabel)
 
                 // Timing (flares have begin/peak/end)
                 if event.peakTime != nil || event.endTime != nil {
@@ -50,6 +55,8 @@ struct SpaceEventDetailView: View {
                             InfoRow(label: "End", value: end)
                         }
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(timingAccessibilityLabel)
                 }
 
                 // Location
@@ -62,6 +69,8 @@ struct SpaceEventDetailView: View {
                             InfoRow(label: "Impact", value: loc)
                         }
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(locationAccessibilityLabel)
                 }
 
                 // Notes
@@ -72,6 +81,8 @@ struct SpaceEventDetailView: View {
                             .foregroundStyle(.primary.opacity(0.85))
                             .fixedSize(horizontal: false, vertical: true)
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Notes: \(event.detail)")
                 }
 
                 // Source link
@@ -84,9 +95,13 @@ struct SpaceEventDetailView: View {
                                 Spacer()
                                 Image(systemName: "arrow.up.right")
                                     .font(.caption)
+                                    .accessibilityHidden(true)
                             }
                             .foregroundStyle(.blue)
                         }
+                        .accessibilityLabel("View on NASA DONKI")
+                        .accessibilityHint("Opens in browser")
+                        .accessibilityAddTraits(.isLink)
                     }
                 }
             }
@@ -94,8 +109,30 @@ struct SpaceEventDetailView: View {
         }
         .navigationTitle(event.type)
         .navigationBarTitleDisplayMode(.inline)
-        .defaultBackground(withStreaks: false)
+        .defaultBackground(reduceMotion: reduceMotion)
         .preferredColorScheme(.dark)
+    }
+
+    // MARK: - Accessibility label helpers
+
+    var headerAccessibilityLabel: String {
+        var parts = [event.type, event.date]
+        if let cls = event.classType { parts.append("class \(cls)") }
+        return parts.joined(separator: ", ")
+    }
+
+    var timingAccessibilityLabel: String {
+        var parts = ["Timing", "begins \(event.date)"]
+        if let peak = event.peakTime { parts.append("peaks \(peak)") }
+        if let end = event.endTime { parts.append("ends \(end)") }
+        return parts.joined(separator: ", ")
+    }
+
+    var locationAccessibilityLabel: String {
+        var parts = ["Location"]
+        if let src = event.sourceLocation { parts.append("source \(src)") }
+        if let loc = event.location { parts.append("impact \(loc)") }
+        return parts.joined(separator: ", ")
     }
 
     func classTypeColor(_ cls: String) -> Color {
@@ -119,7 +156,8 @@ struct SectionCard<Content: View>: View {
         VStack(alignment: .leading, spacing: 12) {
             Label(title, systemImage: systemImage)
                 .font(.headline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.primary.opacity(0.75))
+                .accessibilityHidden(true) // spoken via parent .accessibilityLabel
             content()
         }
         .padding()
@@ -137,7 +175,7 @@ struct InfoRow: View {
         HStack(alignment: .top) {
             Text(label)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.primary.opacity(0.6))
                 .frame(width: 70, alignment: .leading)
             Text(value)
                 .font(.subheadline)
