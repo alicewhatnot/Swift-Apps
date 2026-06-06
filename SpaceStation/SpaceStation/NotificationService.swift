@@ -93,7 +93,11 @@ struct NotificationService {
         }
 
         let timeText = approach?.timeToApproach ?? "soon"
-        content.body = "\(asteroid.name) passes at \(distanceText) in \(timeText)."
+        if timeText == "Already passed" {
+            content.body = "\(asteroid.name) passed at \(distanceText)."
+        } else {
+            content.body = "\(asteroid.name) passes at \(distanceText) in \(timeText)."
+        }
         content.subtitle = "Diameter ~\(String(format: "%.0f", asteroid.diameterKM * 1000)) m"
 
         // Unique identifier per asteroid so duplicate notifications are suppressed
